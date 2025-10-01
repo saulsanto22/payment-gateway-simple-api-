@@ -1,0 +1,113 @@
+{
+  "info": {
+    "name": "Laravel Shop Full API",
+    "_postman_id": "12345678-abcd-1234-efgh-567890abcdef",
+    "description": "Full API collection: Auth, Product, Cart, Orders, Checkout, Charts & Midtrans Snap",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123!\",\n  \"password_confirmation\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api","auth","register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\":\"john@example.com\",\n  \"password\":\"Password123!\"\n}" },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api","auth","login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/products", "host": ["{{base_url}}"], "path": ["api","products"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "View Cart",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/cart", "host": ["{{base_url}}"], "path": ["api","cart"] } }
+        },
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}" },
+            "url": { "raw": "{{base_url}}/api/cart", "host": ["{{base_url}}"], "path": ["api","cart"] }
+          }
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/cart/1", "host": ["{{base_url}}"], "path": ["api","cart","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Checkout",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/orders/checkout", "host": ["{{base_url}}"], "path": ["api","orders","checkout"] } }
+        },
+        {
+          "name": "Order History",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/orders", "host": ["{{base_url}}"], "path": ["api","orders"] } }
+        },
+        {
+          "name": "Payment Callback",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"order_id\": 1,\n  \"transaction_status\": \"capture\"\n}" },
+            "url": { "raw": "{{base_url}}/api/payment/callback", "host": ["{{base_url}}"], "path": ["api","payment","callback"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Charts",
+      "item": [
+        {
+          "name": "Sales Chart",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/charts/sales", "host": ["{{base_url}}"], "path": ["api","charts","sales"] } }
+        },
+        {
+          "name": "Revenue Chart",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/api/charts/revenue", "host": ["{{base_url}}"], "path": ["api","charts","revenue"] } }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" }
+  ]
+}
