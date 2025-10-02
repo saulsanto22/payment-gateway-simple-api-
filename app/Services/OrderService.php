@@ -10,9 +10,9 @@ class OrderService
 {
     protected MidtransService $midtransService;
 
-    protected MidtransService $orderRepository;
+    protected OrderRepository $orderRepository;
 
-    protected MidtransService $cartRepository;
+    protected CartRepository $cartRepository;
 
     public function __construct(MidtransService $midtransService, OrderRepository $orderRepository, CartRepository $cartRepository)
     {
@@ -23,7 +23,7 @@ class OrderService
 
     public function checkout($user)
     {
-        $cartItems = $this->cartRepository->getCart($user->id);
+        $cartItems = $this->cartRepository->getUserCart($user->id);
 
         if ($cartItems->isEmpty()) {
             return null;
@@ -42,6 +42,7 @@ class OrderService
         }
 
         $snapToken = $this->midtransService->createSnapToken($order);
+
         $order->update([
             'snap_token' => $snapToken,
         ]);

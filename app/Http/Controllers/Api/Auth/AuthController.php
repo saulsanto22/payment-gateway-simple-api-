@@ -29,7 +29,7 @@ class AuthController extends Controller
         $data = $this->authService->login($request->validated());
 
         if (! $data) {
-            return ApiResponse::error($data['error']);
+            return ApiResponse::error('Akun tidak ditemukan', 404);
         }
 
         return ApiResponse::success($data, 'Login successfully');

@@ -44,4 +44,9 @@ class OrderRepository
     {
         return Order::find($orderId);
     }
+
+    public function getOrderHistory($user)
+    {
+        return Order::with('items.product')->where('user_id', $user->id)->get();
+    }
 }

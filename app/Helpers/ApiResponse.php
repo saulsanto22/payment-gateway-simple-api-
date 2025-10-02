@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Helpers;
+
 class ApiResponse
 {
     public static function success($data = null, string $message = 'Success', int $code = 200)

@@ -3,14 +3,17 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
     public function register($data)
     {
-        return DB::transaction(function () use ($data) {
+
+        try {
+
+            DB::beginTransaction();
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -18,13 +21,19 @@ class AuthService
             ]);
 
             $token = $user->createToken('api_token')->plainTextToken;
+            DB::commit();
 
             return [
                 'user' => $user,
                 'token' => $token,
             ];
 
-        });
+        } catch (\Exception $e) {
+            DB::RollBack();
+
+            return $e;
+        }
+
     }
 
     public function login($data)

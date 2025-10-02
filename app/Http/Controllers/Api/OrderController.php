@@ -23,13 +23,14 @@ class OrderController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
-        $data = $this->orderService->checkout($request->user());
+
+        $order = $this->orderService->checkout($request->user());
 
         if (! $order) {
             return ApiResponse::error('Cart Kosong!!!!', 404);
         }
 
-        return ApiResponse::success($data, 'Checkout successfully');
+        return ApiResponse::success($order, 'Checkout successfully');
     }
 
     public function callback(Request $request)
@@ -40,8 +41,15 @@ class OrderController extends Controller
             return ApiResponse::error('Order not found', 404);
         }
 
-        $updatedOrder = $this->orderService->callback($order);
+        $updatedOrder = $this->orderService->handleCallback($order, $request->transaction_status);
 
         return ApiResponse::success($updatedOrder, 'Callback successfully');
+    }
+
+    public function history(Request $request)
+    {
+        $order = $this->orderRepository->getOrderHistory($request->user());
+
+        return ApiResponse::success($order, 'History successfully');
     }
 }
