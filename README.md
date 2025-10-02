@@ -1,66 +1,119 @@
-<<<<<<< HEAD
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Payment Gateway Laravel 12 + Midtrans
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Proyek ini adalah contoh implementasi **Payment Gateway** menggunakan **Laravel 12** dan **Midtrans Snap** dengan arsitektur best practice:
+- Menggunakan **Repository Pattern** & **Service Layer** untuk pemisahan logika bisnis.
+- **Form Request Validation** untuk validasi input.
+- **Enum** untuk status order.
+- **Resource** untuk response API agar lebih rapi.
+- **Cart & Order flow** hingga integrasi Midtrans Snap.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📦 Fitur
+- 🔐 **Auth**: Register & Login user dengan Sanctum.
+- 🛒 **Cart**: Tambah, lihat, hapus produk dari cart.
+- 📦 **Order**: Checkout cart menjadi order.
+- 💳 **Payment**: Integrasi Midtrans Snap untuk pembayaran.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ⚙️ Instalasi
 
-## Learning Laravel
+1. Clone repository
+   ```bash
+   git clone https://github.com/your-username/payment-gateway-laravel12.git
+   cd payment-gateway-laravel12
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+2. Install dependencies
+   ```bash
+   composer install
+   npm install && npm run build
+   ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+3. Salin file `.env`
+   ```bash
+   cp .env.example .env
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+4. Generate key
+   ```bash
+   php artisan key:generate
+   ```
 
-## Laravel Sponsors
+5. Jalankan migrasi & seed
+   ```bash
+   php artisan migrate --seed
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+6. Jalankan server
+   ```bash
+   php artisan serve
+   ```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🔑 Konfigurasi Midtrans
 
-## Contributing
+1. Buat akun di [Midtrans Dashboard](https://dashboard.midtrans.com/).
+2. Masuk ke **Sandbox Mode**.
+3. Ambil **Server Key** dan **Client Key**.
+4. Tambahkan ke file `.env`:
+   ```env
+   MIDTRANS_SERVER_KEY=SB-Mid-server-xxxx
+   MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxx
+   MIDTRANS_IS_PRODUCTION=false
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 📡 Endpoint API
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Auth
+- `POST /api/register` → Register user baru
+- `POST /api/login` → Login user & dapatkan token
 
-## Security Vulnerabilities
+### Cart
+- `POST /api/cart/add` → Tambah produk ke cart
+- `GET /api/cart` → Lihat isi cart
+- `DELETE /api/cart/{id}` → Hapus produk dari cart
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Order
+- `POST /api/orders/checkout` → Checkout cart → buat order + Snap Token
+- `GET /api/orders` → Lihat daftar order user
+- `GET /api/orders/{id}` → Lihat detail order
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-=======
-# payment-gateway-simple-api-
-simple api payment gate way with midtrans N laravel
->>>>>>> d4c7b7c3b1835b376925db7887174c47f2c0faff
+## 💳 Alur Payment dengan Midtrans
+
+1. User **daftar & login** → dapatkan token.
+2. User **tambah produk** ke cart.
+3. User **checkout cart** → backend membuat order & memanggil Midtrans API.
+4. Backend mengembalikan **Snap Token** ke frontend.
+5. Frontend memanggil `window.snap.pay(token)` (Midtrans Snap.js) untuk membuka UI pembayaran.
+6. Midtrans mengirim callback/webhook ke backend → update status order.
+
+---
+
+## 🧪 Postman Collection
+
+File **Postman Collection** tersedia di repo:
+```
+postman/PaymentGateway.postman_collection.json
+```
+
+Import ke Postman untuk langsung coba semua endpoint.
+
+---
+
+## 📝 Catatan
+- Gunakan data dummy produk dari seeder.
+- Semua pembayaran masih dalam **Sandbox Mode** (testing).
+- Ubah `MIDTRANS_IS_PRODUCTION=true` hanya di mode produksi.
+
+---
+
+## 📚 Referensi
+- [Laravel 12 Docs](https://laravel.com/docs)
+- [Midtrans API Docs](https://docs.midtrans.com/)
