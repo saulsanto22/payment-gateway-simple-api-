@@ -33,23 +33,43 @@ class OrderController extends Controller
         return ApiResponse::success($order, 'Checkout successfully');
     }
 
-    public function callback(Request $request)
-    {
-        $order = $this->orderRepository->findOrder($request->order_id);
-
-        if (! $order) {
-            return ApiResponse::error('Order not found', 404);
-        }
-
-        $updatedOrder = $this->orderService->handleCallback($order, $request->transaction_status);
-
-        return ApiResponse::success($updatedOrder, 'Callback successfully');
-    }
-
     public function history(Request $request)
     {
         $order = $this->orderRepository->getOrderHistory($request->user());
 
         return ApiResponse::success($order, 'History successfully');
+    }
+
+    public function webhook(Request $request)
+    {
+        \Log::info('midtrans webhook', $request->all());
+
+        $serverKey = config('midtrans.server_key');
+
+        $orderId = $request->input('order_id');
+        $statusCode = $request->input('status_code');
+        $grossAmount = $request->input('gross_amount');
+        $signatureKey = $request->input('signature_key');
+        $transactionStatus = $request->input('transaction_status');
+        $paymentType = $request->input('payment_type');
+        $fraudStatus = $request->input('fraud_status');
+
+        $mySignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
+
+        if ($signatureKey != $mySignature) {
+            \Log::info('invalid signature key');
+
+            return ApiResponse::error('Invalid signature key', 404);
+        }
+
+        $order = $this->orderRepository->findOrder($orderId);
+
+        if (! $order) {
+            return ApiResponse::error('Order not found', 404);
+        }
+
+        $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus);
+
+        return ApiResponse::success($updatedOrder, 'Callback successfully');
     }
 }

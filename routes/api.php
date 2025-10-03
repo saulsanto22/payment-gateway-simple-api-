@@ -28,5 +28,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 });
-
-Route::post('/payment/callback', [OrderController::class, 'callback']);
+Route::post('/midtrans/webhook', [OrderController::class, 'webhook']);
