@@ -13,6 +13,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'order_number', // digunakan sebagai order_id di Midtrans
         'total_price',
         'status',
         'snap_token',
@@ -21,7 +22,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'status' => OrderStatus::class,
+            'status' => OrderStatus::class, // cast ke enum agar aman dan konsisten
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

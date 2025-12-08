@@ -5,13 +5,22 @@ namespace App\Repositories;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Str;
 
 class OrderRepository
 {
+    /**
+     * Membuat order baru sekaligus menghasilkan order_number yang unik.
+     * order_number digunakan sebagai order_id untuk Midtrans.
+     */
     public function createOrder($userId, $total)
     {
+        // Format sederhana: ORD-YYYYMMDDHHMMSS-5charRandom
+        $orderNumber = 'ORD-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(5));
+
         return Order::create([
             'user_id' => $userId,
+            'order_number' => $orderNumber,
             'total_price' => $total,
             'status' => OrderStatus::PENDING,
         ]);
@@ -40,9 +49,12 @@ class OrderRepository
         return Order::with('items.product')->find($orderId);
     }
 
-    public function findOrder($orderId)
+    /**
+     * Cari order berdasarkan order_number (untuk webhook Midtrans yang menggunakan order_id = order_number)
+     */
+    public function findOrderByNumber($orderNumber)
     {
-        return Order::find($orderId);
+        return Order::where('order_number', $orderNumber)->first();
     }
 
     public function getOrderHistory($user, $perPage = 15)

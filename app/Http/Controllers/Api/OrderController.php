@@ -48,7 +48,7 @@ class OrderController extends Controller
 
         $serverKey = config('midtrans.server_key');
 
-        $orderId = $request->input('order_id');
+        $orderId = $request->input('order_id'); // order_number dari Midtrans
         $statusCode = $request->input('status_code');
         $grossAmount = $request->input('gross_amount');
         $signatureKey = $request->input('signature_key');
@@ -56,6 +56,7 @@ class OrderController extends Controller
         $paymentType = $request->input('payment_type');
         $fraudStatus = $request->input('fraud_status');
 
+        // Validasi signature sesuai dokumentasi Midtrans
         $mySignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         if ($signatureKey != $mySignature) {
@@ -64,7 +65,8 @@ class OrderController extends Controller
             return ApiResponse::error('Invalid signature key', 401);
         }
 
-        $order = $this->orderRepository->findOrder($orderId);
+        // Cari order menggunakan order_number
+        $order = $this->orderRepository->findOrderByNumber($orderId);
 
         if (! $order) {
             return ApiResponse::error('Order not found', 404);
@@ -75,7 +77,7 @@ class OrderController extends Controller
             return ApiResponse::success($order, 'Already final state');
         }
 
-        $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus);
+        $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus, $fraudStatus);
 
         return ApiResponse::success($updatedOrder, 'Callback successfully');
     }

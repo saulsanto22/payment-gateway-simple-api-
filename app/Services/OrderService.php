@@ -55,13 +55,16 @@ class OrderService
             }
         });
 
+        // refresh relasi items & user untuk Midtrans payload
+        $order = $this->orderRepository->getOrderWithItems($order->id);
+
         // generate snap token di luar transaksi DB
         $snapToken = $this->midtransService->createSnapToken($order);
         $order->update([
             'snap_token' => $snapToken,
         ]);
 
-        return $this->orderRepository->getOrderWithItems($order->id);
+        return $order;
     }
 
     public function handleCallback($order, $transactionStatus, $fraudStatus = null)
