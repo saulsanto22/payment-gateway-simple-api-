@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddCartRequest;
 use App\Services\CartService;
 
-class ChartController extends Controller
+class CartController extends Controller
 {
     protected $cartService;
 
@@ -30,13 +30,12 @@ class ChartController extends Controller
 
     public function remove($productId)
     {
+        $deleted = $this->cartService->removeItem(auth()->user(), $productId);
 
-        $deleteItem = $this->cartService->removeItem(auth()->user(), $productId);
-
-        if (! $deleteItem) {
+        if (! $deleted) {
             return ApiResponse::error('Item not found', 404);
         }
 
-        return ApiResponse::success($deleteItem, 'Item removed from cart');
+        return ApiResponse::success(null, 'Item removed from cart');
     }
 }

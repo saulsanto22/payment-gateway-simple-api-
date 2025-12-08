@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
@@ -30,39 +31,54 @@ class OrderService
         }
 
         $total = 0;
-
         foreach ($cartItems as $item) {
             $total += $item->product->price * $item->quantity;
         }
 
-        $order = $this->orderRepository->createOrder($user->id, $total);
+        $order = null;
 
-        foreach ($cartItems as $item) {
-            $this->orderRepository->addOrderItem($order->id, $item->product_id, $item->quantity, $item->product->price);
-        }
+        DB::transaction(function () use ($user, $cartItems, $total, &$order) {
+            $order = $this->orderRepository->createOrder($user->id, $total);
 
+            foreach ($cartItems as $item) {
+                $this->orderRepository->addOrderItem(
+                    $order->id,
+                    $item->product_id,
+                    $item->quantity,
+                    $item->product->price
+                );
+            }
+
+            // bersihkan cart dalam transaksi agar konsisten
+            foreach ($cartItems as $item) {
+                $item->delete();
+            }
+        });
+
+        // generate snap token di luar transaksi DB
         $snapToken = $this->midtransService->createSnapToken($order);
-
         $order->update([
             'snap_token' => $snapToken,
         ]);
 
-        foreach ($cartItems as $item) {
-            $item->delete();
-        }
-
         return $this->orderRepository->getOrderWithItems($order->id);
-
     }
 
-    public function handleCallback($order, $status)
+    public function handleCallback($order, $transactionStatus, $fraudStatus = null)
     {
-        $orderStatus = match ($status) {
-            'capture', 'settlement' => OrderStatus::PAID,
+        $orderStatus = match ($transactionStatus) {
+            'settlement' => OrderStatus::PAID,
+            'capture' => $fraudStatus === 'challenge' ? OrderStatus::PENDING : OrderStatus::PAID,
             'cancel', 'deny' => OrderStatus::CANCELLED,
             'expire' => OrderStatus::EXPIRED,
-            default => OrderStatus::PENDING
+            default => OrderStatus::PENDING,
         };
+
+        // jika status saat ini sudah final dan target bukan status yang lebih kuat, abaikan
+        $finalStates = [OrderStatus::PAID, OrderStatus::CANCELLED, OrderStatus::EXPIRED];
+        if (in_array($order->status, $finalStates, true)) {
+            return $order;
+        }
 
         return $this->orderRepository->updateStatus($order, $orderStatus);
     }

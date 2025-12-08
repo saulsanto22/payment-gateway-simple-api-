@@ -2,15 +2,31 @@
 
 namespace App\Helpers;
 
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 class ApiResponse
 {
     public static function success($data = null, string $message = 'Success', int $code = 200)
     {
-        return response()->json([
+        $payload = [
             'success' => true,
             'message' => $message,
             'data' => $data,
-        ], $code);
+        ];
+
+        if ($data instanceof LengthAwarePaginator || $data instanceof Paginator) {
+            $payload['meta'] = [
+                'current_page' => method_exists($data, 'currentPage') ? $data->currentPage() : null,
+                'per_page' => method_exists($data, 'perPage') ? $data->perPage() : null,
+                'total' => method_exists($data, 'total') ? $data->total() : null,
+                'last_page' => method_exists($data, 'lastPage') ? $data->lastPage() : null,
+            ];
+            // pastikan data hanya berisi items, bukan obj paginator penuh
+            $payload['data'] = $data->items();
+        }
+
+        return response()->json($payload, $code);
     }
 
     public static function error(string $message = 'Error', int $code = 400, $errors = null)

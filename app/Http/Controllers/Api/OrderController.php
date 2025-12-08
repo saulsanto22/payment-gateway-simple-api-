@@ -23,7 +23,6 @@ class OrderController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
-
         $order = $this->orderService->checkout($request->user());
 
         if (! $order) {
@@ -35,7 +34,10 @@ class OrderController extends Controller
 
     public function history(Request $request)
     {
-        $order = $this->orderRepository->getOrderHistory($request->user());
+        $perPage = (int) ($request->get('per_page', 15));
+        $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 15;
+
+        $order = $this->orderRepository->getOrderHistory($request->user(), $perPage);
 
         return ApiResponse::success($order, 'History successfully');
     }
@@ -59,13 +61,18 @@ class OrderController extends Controller
         if ($signatureKey != $mySignature) {
             \Log::info('invalid signature key');
 
-            return ApiResponse::error('Invalid signature key', 404);
+            return ApiResponse::error('Invalid signature key', 401);
         }
 
         $order = $this->orderRepository->findOrder($orderId);
 
         if (! $order) {
             return ApiResponse::error('Order not found', 404);
+        }
+
+        // idempotensi dasar: jika status sudah final, jangan timpa lagi
+        if (in_array((string) $order->status, ['PAID', 'CANCELLED', 'EXPIRED'], true)) {
+            return ApiResponse::success($order, 'Already final state');
         }
 
         $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Repositories\ProductRepository;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -15,8 +16,11 @@ class ProductController extends Controller
         $this->productRepository = $productRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return ApiResponse::success($this->productRepository->all());
+        $perPage = (int) ($request->get('per_page', 15));
+        $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 15;
+
+        return ApiResponse::success($this->productRepository->all($perPage));
     }
 }

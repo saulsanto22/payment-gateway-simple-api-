@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\ChartController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +17,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('cart')->group(function () {
-        Route::get('/', [ChartController::class, 'index']);
-        Route::post('/', [ChartController::class, 'add']);
-        Route::delete('/{id}', [ChartController::class, 'remove']);
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/', [CartController::class, 'add']);
+        Route::delete('/{id}', [CartController::class, 'remove']);
     });
 
     Route::prefix('orders')->group(function () {

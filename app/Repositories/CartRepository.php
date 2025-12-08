@@ -21,14 +21,14 @@ class CartRepository
 
     public function remove($userId, $productId)
     {
-        return Cart::where('user_id', $userId)->where('product_id', $productId)->first();
+        $cart = Cart::where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->first();
 
         if (! $cart) {
-            return null;
+            return false;
         }
 
-        $cart->delete();
-
-        return true;
+        return (bool) $cart->delete();
     }
 }

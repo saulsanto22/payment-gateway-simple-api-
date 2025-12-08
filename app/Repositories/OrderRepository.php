@@ -45,8 +45,11 @@ class OrderRepository
         return Order::find($orderId);
     }
 
-    public function getOrderHistory($user)
+    public function getOrderHistory($user, $perPage = 15)
     {
-        return Order::with('items.product')->where('user_id', $user->id)->get();
+        return Order::with('items.product')
+            ->where('user_id', $user->id)
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 }
