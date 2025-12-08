@@ -47,8 +47,8 @@ class MidtransService
             ],
         ];
 
-        $snapToken = Snap::getSnapToken($params);
-
+        $snapToken = Snap::createTransaction($params);
+        // dd($snapToken);
         return $snapToken;
     }
 }

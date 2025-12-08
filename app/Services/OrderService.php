@@ -60,8 +60,10 @@ class OrderService
 
         // generate snap token di luar transaksi DB
         $snapToken = $this->midtransService->createSnapToken($order);
+        
         $order->update([
-            'snap_token' => $snapToken,
+            'snap_token' => $snapToken->token,
+            'redirect_url' => $snapToken->redirect_url,
         ]);
 
         return $order;

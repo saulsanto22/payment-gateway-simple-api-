@@ -18,9 +18,18 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
+        // Ambil parameter filter & sort dari query string
         $perPage = (int) ($request->get('per_page', 15));
         $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 15;
 
-        return ApiResponse::success($this->productRepository->all($perPage));
+        $q = $request->get('q');
+        $minPrice = $request->has('min_price') ? (float) $request->get('min_price') : null;
+        $maxPrice = $request->has('max_price') ? (float) $request->get('max_price') : null;
+        $sortBy = $request->get('sort_by');
+        $sortDir = $request->get('sort_dir');
+        
+        $products = $this->productRepository->all($perPage, $q, $minPrice, $maxPrice, $sortBy, $sortDir);
+
+        return ApiResponse::success($products);
     }
 }

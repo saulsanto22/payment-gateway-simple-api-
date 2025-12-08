@@ -17,6 +17,7 @@ class Order extends Model
         'total_price',
         'status',
         'snap_token',
+        'redirect_url',
     ];
 
     protected function casts(): array

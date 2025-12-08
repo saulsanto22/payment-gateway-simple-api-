@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
+use App\Enums\OrderStatus;
 use App\Repositories\OrderRepository;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -72,10 +73,40 @@ class OrderController extends Controller
             return ApiResponse::error('Order not found', 404);
         }
 
-        // idempotensi dasar: jika status sudah final, jangan timpa lagi
-        if (in_array((string) $order->status, ['PAID', 'CANCELLED', 'EXPIRED'], true)) {
+        // Validasi tambahan: gross_amount harus sama dengan total_price di DB
+        $orderAmountString = number_format((float) $order->total_price, 2, '.', '');
+        if ((string) $grossAmount !== $orderAmountString) {
+            \Log::warning('gross_amount mismatch', [
+                'order_number' => $order->order_number,
+                'midtrans_gross_amount' => $grossAmount,
+                'order_total_price' => $orderAmountString,
+            ]);
+
+            // Mengembalikan 400 agar mismatch jelas terdeteksi (sesuai persetujuan)
+            return ApiResponse::error('Invalid amount', 400);
+        }
+
+        // Idempotensi sederhana: jika status sudah final, jangan timpa lagi
+        if (in_array($order->status, [OrderStatus::PAID, OrderStatus::CANCELLED, OrderStatus::EXPIRED], true)) {
             return ApiResponse::success($order, 'Already final state');
         }
+
+        // Log notifikasi untuk idempotensi yang lebih kuat
+        $payload = $request->getContent();
+        $payloadHash = hash('sha256', $payload);
+
+        // Simpan log; jika payload sama sudah ada, anggap duplikat dan kembalikan sukses
+        \DB::table('payment_notifications')->updateOrInsert(
+            ['payload_hash' => $payloadHash],
+            [
+                'order_number' => $order->order_number,
+                'transaction_status' => $transactionStatus,
+                'signature_key' => $signatureKey,
+                'payload' => $payload,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
 
         $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus, $fraudStatus);
 
