@@ -87,4 +87,13 @@ class OrderService
 
         return $this->orderRepository->updateStatus($order, $orderStatus);
     }
+
+    public function updateProductStock($order)
+    {
+        foreach ($order->items as $item) {
+            $product = $item->product;
+            $product->decrement('stock', $item->quantity);
+        }
+    }
+
 }

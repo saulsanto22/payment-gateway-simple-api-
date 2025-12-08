@@ -110,6 +110,11 @@ class OrderController extends Controller
 
         $updatedOrder = $this->orderService->handleCallback($order, $transactionStatus, $fraudStatus);
 
+        // update stock produk jika status paid
+        if ($updatedOrder->status === OrderStatus::PAID) {
+            $this->orderService->updateProductStock($updatedOrder);
+        }
+
         return ApiResponse::success($updatedOrder, 'Callback successfully');
     }
 }
