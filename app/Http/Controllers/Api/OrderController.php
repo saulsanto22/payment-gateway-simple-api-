@@ -47,7 +47,19 @@ class OrderController extends Controller
     public function webhook(Request $request)
     {
         \Log::info('Midtrans webhook received', $request->all());
-        ProcessMidtransWebhook::dispatch($request->all());
+
+        //validasi dulu 
+
+        $payload = $request->validate([
+            'order_id' => 'required|string',
+            'status_code' => 'required|string',
+            'gross_amount' => 'required|string',
+            'signature_key' => 'required|string',
+            'transaction_status' => 'required|string',
+            'fraud_status' => 'sometimes|string',
+        ]);
+
+        ProcessMidtransWebhook::dispatch($payload);
         return ApiResponse::success(null, 'Webhook received and queued for processing');
     }
 }

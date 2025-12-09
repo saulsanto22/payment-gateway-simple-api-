@@ -5,4 +5,6 @@ use Illuminate\Support\Facades\Artisan;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+})->purpose('Display acn inspiring quote');
+
+Schedule::command('order:reminder-unpaid-order')->dailyAt('08:00')->withoutOverlapping();
