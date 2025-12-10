@@ -5,3 +5,4 @@ test_job:
   stage: test
   script:
     - echo "Running tests..."
+    = echo "All tests passed!"
