@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\OrderStatus;
 use App\Jobs\SendOrderReminderJob;
 use App\Models\Order;
+use App\Repositories\OrderRepository;
 use Illuminate\Console\Command;
 
 class ReminderUnpaidOrder extends Command
@@ -22,18 +23,24 @@ class ReminderUnpaidOrder extends Command
      * @var string
      */
     protected $description = 'Send reminders for unpaid orders';
+    protected $orderRepository;
 
     /**
      * Execute the console command.
      */
+
+
+    //buat depedensi injection untuk orderRepository
+    public function __construct(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+
+    }
     public function handle()
     {
-        //
 
         //ambil data order yang statusnya unpaid dan kirimkan email reminder
-        $orders = Order::where('status', OrderStatus::PENDING)
-            ->where('created_at', '<=', now()->subHours(24))
-            ->get();
+        $orders = $this->orderRepository->GetPendingOrder();
 
         foreach ($orders as $order) {
             //kirim email reminder

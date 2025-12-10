@@ -64,4 +64,13 @@ class OrderRepository
             ->orderByDesc('id')
             ->paginate($perPage);
     }
+
+    //ambil data order yang pending lebih dari 24 jam
+    public function GetPendingOrder(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Order::where('status', OrderStatus::PENDING)
+            ->where('created_at', '<=', now()->subHours(24))
+            ->get();
+
+    }
 }
