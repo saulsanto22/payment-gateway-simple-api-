@@ -6,12 +6,14 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->group(function () {
+// Auth routes dengan rate limiting ketat untuk mencegah brute force
+Route::prefix('auth')->middleware('throttle:login')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-
 });
-Route::middleware('auth:sanctum')->group(function () {
+
+// Protected routes dengan rate limiting standar (60 req/min)
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
     });
@@ -25,7 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('orders')->group(function () {
         Route::post('/checkout', [OrderController::class, 'checkout']);
         Route::get('/history', [OrderController::class, 'history']);
-
     });
 });
-Route::post('/midtrans/webhook', [OrderController::class, 'webhook']);
+
+// Webhook dengan rate limiting lebih longgar (100 req/min)
+Route::post('/midtrans/webhook', [OrderController::class, 'webhook'])
+    ->middleware('throttle:webhook');
