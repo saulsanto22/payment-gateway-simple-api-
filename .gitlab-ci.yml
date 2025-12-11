@@ -27,8 +27,7 @@ build:
       - .
     expire_in: 1 hour
   
-
-  deploy:
+deploy:
     stage: deploy
     script:
       - echo "Deploying Belum ada!"
