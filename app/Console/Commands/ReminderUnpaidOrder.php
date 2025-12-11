@@ -32,6 +32,7 @@ class ReminderUnpaidOrder extends Command
     // buat depedensi injection untuk orderRepository
     public function __construct(OrderRepository $orderRepository)
     {
+        parent::__construct();
         $this->orderRepository = $orderRepository;
 
     }
@@ -48,9 +49,9 @@ class ReminderUnpaidOrder extends Command
             \Log::info($order->user->email);
 
         }
-        \Log::info('Reminder command triggered at '.now());
+        \Log::info('Reminder command triggered at ' . now());
 
-        $this->info('Reminder emails dispatched for '.count($orders).' unpaid orders.');
+        $this->info('Reminder emails dispatched for ' . count($orders) . ' unpaid orders.');
 
     }
 }

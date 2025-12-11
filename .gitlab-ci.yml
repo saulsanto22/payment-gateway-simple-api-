@@ -1,24 +1,36 @@
 stages:
   - test
+  - build
+  - deploy
 
-variables:
-  # Menggunakan file composer.lock untuk key cache
-  COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer_cache"
-
-cache:
-  key:
-    files:
-      - composer.lock
-  paths:
-    - vendor/
-    - .composer_cache/
-
-test_code_style:
-  image: php:8.2
+pint:
   stage: test
-  before_script:
-    - apt-get update && apt-get install -y unzip git
-    - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install --prefer-dist --no-progress
+  image: laravelsail/php83-composer:latest
   script:
+    - composer install --no-dev --prefer-dist --no-progress
     - php artisan pint --test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: always
+
+build:
+  stage: build
+  image: laravelsail/php83-composer:latest
+  script:
+    - composer install --no-dev --optimize-autoloader --no-interaction
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: always
+  artifacts:
+    paths:
+      - vendor/
+      - .
+    expire_in: 1 hour
+  
+
+  deploy:
+    stage: deploy
+    script:
+      - echo "Deploying Belum ada!"
+    rules:
+      - when: manual
