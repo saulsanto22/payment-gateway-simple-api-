@@ -7,7 +7,7 @@ pint:
   stage: test
   image: laravelsail/php83-composer:latest
   script:
-    - composer install --no-dev --prefer-dist --no-progress
+    - composer install --prefer-dist --no-progress
     - php artisan pint --test
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
