@@ -2,29 +2,30 @@
 
 namespace App\Jobs;
 
+use App\Enums\OrderStatus;
+use App\Repositories\OrderRepository;
+use App\Services\OrderService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Enums\OrderStatus;
-use App\Repositories\OrderRepository;
-use App\Services\OrderService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
 
 class ProcessMidtransWebhook implements ShouldQueue
 {
-    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
      */
-
     protected $payload;
+
     protected $tries = 3;
+
     protected $timeout = 120;
+
     public function __construct($payload)
     {
         $this->payload = $payload;
@@ -47,22 +48,24 @@ class ProcessMidtransWebhook implements ShouldQueue
             $fraudStatus = $this->payload['fraud_status'] ?? null;
 
             // Validasi signature sesuai dokumentasi Midtrans
-            $mySignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+            $mySignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
             if ($signatureKey != $mySignature) {
                 Log::warning('Invalid signature key in queued job', [
                     'order_id' => $orderId,
                     'received_signature' => $signatureKey,
-                    'expected_signature' => $mySignature
+                    'expected_signature' => $mySignature,
                 ]);
+
                 return;
             }
 
             // Cari order menggunakan order_number
             $order = $orderRepository->findOrderByNumber($orderId);
 
-            if (!$order) {
+            if (! $order) {
                 Log::warning('Order not found in queued job', ['order_id' => $orderId]);
+
                 return;
             }
 
@@ -74,6 +77,7 @@ class ProcessMidtransWebhook implements ShouldQueue
                     'midtrans_gross_amount' => $grossAmount,
                     'order_total_price' => $orderAmountString,
                 ]);
+
                 return;
             }
 
@@ -81,8 +85,9 @@ class ProcessMidtransWebhook implements ShouldQueue
             if (in_array($order->status, [OrderStatus::PAID, OrderStatus::CANCELLED, OrderStatus::EXPIRED], true)) {
                 Log::info('Order already in final state', [
                     'order_id' => $orderId,
-                    'status' => $order->status
+                    'status' => $order->status,
                 ]);
+
                 return;
             }
 
@@ -113,14 +118,14 @@ class ProcessMidtransWebhook implements ShouldQueue
 
             Log::info('Successfully processed Midtrans webhook', [
                 'order_id' => $orderId,
-                'status' => $updatedOrder->status
+                'status' => $updatedOrder->status,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error processing Midtrans webhook job', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'payload' => $this->payload
+                'payload' => $this->payload,
             ]);
 
             // Re-throw exception agar job bisa di-retry

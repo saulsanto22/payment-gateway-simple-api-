@@ -1,8 +1,24 @@
 stages:
   - test
 
-test_job:
+variables:
+  # Menggunakan file composer.lock untuk key cache
+  COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer_cache"
+
+cache:
+  key:
+    files:
+      - composer.lock
+  paths:
+    - vendor/
+    - .composer_cache/
+
+test_code_style:
+  image: php:8.2
   stage: test
+  before_script:
+    - apt-get update && apt-get install -y unzip git
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --prefer-dist --no-progress
   script:
-    - echo "Running tests..."
-    - echo "All tests passed!"
+    - php artisan pint --test

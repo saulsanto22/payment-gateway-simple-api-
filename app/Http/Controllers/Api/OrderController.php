@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
-use App\Enums\OrderStatus;
+use App\Jobs\ProcessMidtransWebhook;
 use App\Repositories\OrderRepository;
 use App\Services\OrderService;
-use App\Jobs\ProcessMidtransWebhook;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -27,7 +26,7 @@ class OrderController extends Controller
     {
         $order = $this->orderService->checkout($request->user());
 
-        if (!$order) {
+        if (! $order) {
             return ApiResponse::error('Cart Kosong!!!!', 404);
         }
 
@@ -48,7 +47,7 @@ class OrderController extends Controller
     {
         \Log::info('Midtrans webhook received', $request->all());
 
-        //validasi dulu 
+        // validasi dulu
 
         $payload = $request->validate([
             'order_id' => 'required|string',
@@ -60,6 +59,7 @@ class OrderController extends Controller
         ]);
 
         ProcessMidtransWebhook::dispatch($payload);
+
         return ApiResponse::success(null, 'Webhook received and queued for processing');
     }
 }

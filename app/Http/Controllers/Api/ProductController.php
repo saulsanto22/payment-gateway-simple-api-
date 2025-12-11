@@ -27,7 +27,7 @@ class ProductController extends Controller
         $maxPrice = $request->has('max_price') ? (float) $request->get('max_price') : null;
         $sortBy = $request->get('sort_by');
         $sortDir = $request->get('sort_dir');
-        
+
         $products = $this->productRepository->all($perPage, $q, $minPrice, $maxPrice, $sortBy, $sortDir);
 
         return ApiResponse::success($products);

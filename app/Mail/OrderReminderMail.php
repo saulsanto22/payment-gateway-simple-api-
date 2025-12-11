@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -16,9 +15,7 @@ class OrderReminderMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(protected $order)
-    {
-    }
+    public function __construct(protected $order) {}
 
     /**
      * Get the message envelope.
@@ -29,8 +26,8 @@ class OrderReminderMail extends Mailable
             subject: 'Reminder: Your Order is Still Unpaid',
         );
     }
-    /**
 
+    /**
      * Get the message content definition.
      */
     public function content(): Content

@@ -2,8 +2,8 @@
 
 namespace App\Helpers;
 
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class ApiResponse
 {

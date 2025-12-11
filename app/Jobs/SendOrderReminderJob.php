@@ -13,15 +13,19 @@ use Illuminate\Support\Facades\Mail;
 
 class SendOrderReminderJob implements ShouldQueue
 {
-    use Queueable, Dispatchable, InteractsWithQueue;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
      * Create a new job instance.
      */
     public $tries = 5; // Allow 5 attempts
+
     public $timeout = 120; // Allow 120 seconds for execution
+
     public $retryAfter = 60;
+
     protected $order;
+
     public function __construct(Order $order)
     {
         $this->order = $order;
@@ -39,16 +43,15 @@ class SendOrderReminderJob implements ShouldQueue
             Mail::to($this->order->user->email)
                 ->queue(new OrderReminderMail($this->order));
 
-            Log::info('Reminder email sent for order ' . $this->order->order_number);
+            Log::info('Reminder email sent for order '.$this->order->order_number);
         } catch (\Exception $e) {
             Log::error('Error sending order reminder email', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'order_id' => $this->order->id
+                'order_id' => $this->order->id,
             ]);
 
             throw $e;
-
         }
     }
 }
