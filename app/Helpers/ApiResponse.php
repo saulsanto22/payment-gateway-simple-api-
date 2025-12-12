@@ -37,4 +37,21 @@ class ApiResponse
             'errors' => $errors,
         ], $code);
     }
+
+    /**
+     * Response untuk rate limit exceeded (429)
+     *
+     * @param string $message Pesan yang ditampilkan ke user
+     * @param int $retryAfter Berapa detik lagi bisa retry (default: 60)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public static function rateLimit(string $message = 'Terlalu banyak request. Silakan tunggu sebentar.', int $retryAfter = 60)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+            'retry_after' => $retryAfter,
+        ], 429);
+    }
 }
+

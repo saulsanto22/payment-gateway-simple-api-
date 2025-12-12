@@ -6,10 +6,15 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
-// Auth routes dengan rate limiting ketat untuk mencegah brute force
-Route::prefix('auth')->middleware('throttle:login')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+// Auth routes dengan rate limiting berbeda per endpoint
+Route::prefix('auth')->group(function () {
+    // Register: 10 request/menit (lebih longgar karena bisa gagal validation)
+    Route::post('/register', [AuthController::class, 'register'])
+        ->middleware('throttle:register');
+
+    // Login: 5 request/menit (ketat untuk mencegah brute force)
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:login');
 });
 
 // Protected routes dengan rate limiting standar (60 req/min)
