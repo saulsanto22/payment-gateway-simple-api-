@@ -23,8 +23,12 @@ class AuthService
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
-                'role' => $data['role'] ?? UserRole::CUSTOMER, // Default: customer
+                'role' => $data['role'] ?? UserRole::CUSTOMER, // Default: customer (old column)
             ]);
+
+            // Assign Spatie role (sync dengan old role column)
+            $roleName = $data['role'] ?? UserRole::CUSTOMER->value;
+            $user->assignRole($roleName);
 
             DB::commit();
 
@@ -40,7 +44,7 @@ class AuthService
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Register error: '.$e->getMessage());
+            \Log::error('Register error: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -56,19 +60,13 @@ class AuthService
             'password' => $data['password'],
         ];
 
-        // Debug: Log credentials (tanpa password)
-        \Log::info('Login attempt', ['email' => $credentials['email']]);
-
         // JWTAuth::attempt() akan:
         // 1. Cek credentials (email + password)
         // 2. Jika valid, generate JWT token
         // 3. Return token
         $token = JWTAuth::attempt($credentials);
 
-        // Debug: Log token result
-        \Log::info('JWT attempt result', ['token' => $token ? 'SUCCESS' : 'FAILED']);
-
-        if (! $token) {
+        if (!$token) {
             return null; // Login gagal
         }
 

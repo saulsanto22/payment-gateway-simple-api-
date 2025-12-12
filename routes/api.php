@@ -23,21 +23,50 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Protected routes dengan JWT authentication (ganti auth:sanctum ke auth:api)
+// Protected routes dengan JWT authentication & Spatie Permissions
 Route::middleware(['auth:api', 'throttle:api'])->group(function () {
+
+    // Products - Granular permissions
     Route::prefix('products')->group(function () {
-        Route::get('/', [ProductController::class, 'index']);
+        // Semua authenticated users (dengan permission) bisa view products
+        Route::get('/', [ProductController::class, 'index'])
+            ->middleware('permission:view-products');
+
+        // Admin & Merchant only (create, update, delete)
+        Route::post('/', [ProductController::class, 'store'])
+            ->middleware('permission:create-product');
+
+        Route::put('/{id}', [ProductController::class, 'update'])
+            ->middleware('permission:edit-product');
+
+        Route::delete('/{id}', [ProductController::class, 'destroy'])
+            ->middleware('permission:delete-product');
     });
 
+    // Cart - Semua authenticated users
     Route::prefix('cart')->group(function () {
+        // Asumsi: Semua user login boleh akses cart mereka sendiri
         Route::get('/', [CartController::class, 'index']);
         Route::post('/', [CartController::class, 'add']);
         Route::delete('/{id}', [CartController::class, 'remove']);
     });
 
+    // Orders
     Route::prefix('orders')->group(function () {
-        Route::post('/checkout', [OrderController::class, 'checkout']);
-        Route::get('/history', [OrderController::class, 'history']);
+        // Checkout & History: Semua user login (bisa dibatasi permission view-own-orders jika mau ketat)
+        Route::post('/checkout', [OrderController::class, 'checkout'])
+            ->middleware('permission:view-own-orders');
+
+        Route::get('/history', [OrderController::class, 'history'])
+            ->middleware('permission:view-own-orders');
+
+        // Admin & Merchant bisa lihat semua order (upcoming implementation)
+        // Route::get('/all', ...) ->middleware('permission:manage-orders');
+    });
+
+    // Admin Routes
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        // Placeholder untuk future admin endpoints
     });
 });
 
