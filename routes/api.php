@@ -8,17 +8,23 @@ use Illuminate\Support\Facades\Route;
 
 // Auth routes dengan rate limiting berbeda per endpoint
 Route::prefix('auth')->group(function () {
-    // Register: 10 request/menit (lebih longgar karena bisa gagal validation)
+    // Public routes (tidak perlu auth)
     Route::post('/register', [AuthController::class, 'register'])
         ->middleware('throttle:register');
 
-    // Login: 5 request/menit (ketat untuk mencegah brute force)
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:login');
+
+    // Protected routes (perlu JWT token)
+    Route::middleware(['auth:api', 'throttle:api'])->group(function () {
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
 });
 
-// Protected routes dengan rate limiting standar (60 req/min)
-Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+// Protected routes dengan JWT authentication (ganti auth:sanctum ke auth:api)
+Route::middleware(['auth:api', 'throttle:api'])->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
     });
