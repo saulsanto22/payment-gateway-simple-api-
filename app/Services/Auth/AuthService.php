@@ -26,10 +26,11 @@ class AuthService
                 'role' => $data['role'] ?? UserRole::CUSTOMER, // Default: customer
             ]);
 
-            // Generate JWT token (bukan Sanctum!)
-            $token = JWTAuth::fromUser($user);
-
             DB::commit();
+
+            // Generate JWT token SETELAH commit (bukan di dalam transaction)
+            // Kenapa? JWT pakai cache, dan cache query tidak bisa jalan di transaction yang error
+            $token = JWTAuth::fromUser($user);
 
             return [
                 'user' => $user,
@@ -38,7 +39,8 @@ class AuthService
                 'expires_in' => config('jwt.ttl') * 60, // TTL dalam detik
             ];
         } catch (\Exception $e) {
-            DB::RollBack();
+            DB::rollBack();
+            \Log::error('Register error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -54,11 +56,19 @@ class AuthService
             'password' => $data['password'],
         ];
 
+        // Debug: Log credentials (tanpa password)
+        \Log::info('Login attempt', ['email' => $credentials['email']]);
+
         // JWTAuth::attempt() akan:
         // 1. Cek credentials (email + password)
         // 2. Jika valid, generate JWT token
         // 3. Return token
-        if (! $token = JWTAuth::attempt($credentials)) {
+        $token = JWTAuth::attempt($credentials);
+
+        // Debug: Log token result
+        \Log::info('JWT attempt result', ['token' => $token ? 'SUCCESS' : 'FAILED']);
+
+        if (! $token) {
             return null; // Login gagal
         }
 
