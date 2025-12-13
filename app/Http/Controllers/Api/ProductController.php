@@ -28,7 +28,7 @@ class ProductController extends Controller
         $sortBy = $request->get('sort_by');
         $sortDir = $request->get('sort_dir');
 
-        $products = $this->productRepository->all($perPage, $q, $minPrice, $maxPrice, $sortBy, $sortDir);
+        $products = $this->productRepository->search($perPage, $q, $minPrice, $maxPrice, $sortBy, $sortDir);
 
         return ApiResponse::success($products);
     }
