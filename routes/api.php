@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
@@ -23,53 +24,47 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Protected routes dengan JWT authentication & Spatie Permissions
+// --- USER-FACING ROUTES ---
 Route::middleware(['auth:api', 'throttle:api'])->group(function () {
 
-    // Products - Granular permissions
-    Route::prefix('products')->group(function () {
-        // Semua authenticated users (dengan permission) bisa view products
-        Route::get('/', [ProductController::class, 'index'])
-            ->middleware('permission:view-products');
+    // Products for users
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
 
-        // Admin & Merchant only (create, update, delete)
-        Route::post('/', [ProductController::class, 'store'])
-            ->middleware('permission:create-product');
-
-        Route::put('/{id}', [ProductController::class, 'update'])
-            ->middleware('permission:edit-product');
-
-        Route::delete('/{id}', [ProductController::class, 'destroy'])
-            ->middleware('permission:delete-product');
-    });
-
-    // Cart - Semua authenticated users
+    // Cart for users
     Route::prefix('cart')->group(function () {
-        // Asumsi: Semua user login boleh akses cart mereka sendiri
         Route::get('/', [CartController::class, 'index']);
         Route::post('/', [CartController::class, 'add']);
         Route::delete('/{id}', [CartController::class, 'remove']);
     });
 
-    // Orders
+    // Orders for users
     Route::prefix('orders')->group(function () {
-        // Checkout & History: Semua user login (bisa dibatasi permission view-own-orders jika mau ketat)
-        Route::post('/checkout', [OrderController::class, 'checkout'])
-            ->middleware('permission:view-own-orders');
-
-        Route::get('/history', [OrderController::class, 'history'])
-            ->middleware('permission:view-own-orders');
-
-        // Admin & Merchant bisa lihat semua order (upcoming implementation)
-        // Route::get('/all', ...) ->middleware('permission:manage-orders');
-    });
-
-    // Admin Routes
-    Route::prefix('admin')->middleware('role:admin')->group(function () {
-        // Placeholder untuk future admin endpoints
+        Route::post('/checkout', [OrderController::class, 'checkout']);
+        Route::get('/history', [OrderController::class, 'history']);
     });
 });
 
-// Webhook dengan rate limiting lebih longgar (100 req/min)
+
+// --- ADMIN ROUTES ---
+Route::middleware(['auth:api', 'throttle:api', 'role:admin'])->prefix('admin')->group(function () {
+    
+    /**
+     * Route resource untuk admin mengelola produk.
+     * Ini akan secara otomatis membuat route untuk:
+     * GET /admin/products -> AdminProductController@index
+     * POST /admin/products -> AdminProductController@store
+     * GET /admin/products/{product} -> AdminProductController@show
+     * PUT/PATCH /admin/products/{product} -> AdminProductController@update
+     * DELETE /admin/products/{product} -> AdminProductController@destroy
+     */
+    Route::apiResource('products', AdminProductController::class);
+
+    // Di sini Anda bisa menambahkan route admin lainnya di masa depan
+    // Contoh: Route::get('/orders', [AdminOrderController::class, 'index']);
+});
+
+
+// Webhook dari Midtrans
 Route::post('/midtrans/webhook', [OrderController::class, 'webhook'])
     ->middleware('throttle:webhook');
