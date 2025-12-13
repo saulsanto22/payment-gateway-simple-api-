@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\OutOfStockException;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
@@ -24,13 +25,17 @@ class OrderController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
-        $order = $this->orderService->checkout($request->user());
+        try {
+            $order = $this->orderService->checkout($request->user());
 
-        if (! $order) {
-            return ApiResponse::error('Cart Kosong!!!!', 404);
+            if (! $order) {
+                return ApiResponse::error('Cart is empty.', 422); // 422 Unprocessable Entity lebih cocok
+            }
+
+            return ApiResponse::success($order, 'Checkout successfully');
+        } catch (OutOfStockException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
         }
-
-        return ApiResponse::success($order, 'Checkout successfully');
     }
 
     public function history(Request $request)

@@ -35,7 +35,9 @@ Route::middleware(['auth:api', 'throttle:api'])->group(function () {
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index']);
         Route::post('/', [CartController::class, 'add']);
-        Route::delete('/{id}', [CartController::class, 'remove']);
+        Route::put('/{product}', [CartController::class, 'update']);
+        Route::delete('/{product}', [CartController::class, 'remove']);
+        Route::delete('/clear', [CartController::class, 'clear']);
     });
 
     // Orders for users

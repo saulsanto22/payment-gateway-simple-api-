@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddCartRequest;
+use App\Http\Requests\UpdateCartRequest;
 use App\Services\CartService;
 
 class CartController extends Controller
@@ -28,6 +29,13 @@ class CartController extends Controller
             'Item added to cart');
     }
 
+    public function update(UpdateCartRequest $request, $productId)
+    {
+        return ApiResponse::success(
+            $this->cartService->updateItem(auth()->user(), $productId, $request->quantity),
+            'Item updated');
+    }
+
     public function remove($productId)
     {
         $deleted = $this->cartService->removeItem(auth()->user(), $productId);
@@ -37,5 +45,12 @@ class CartController extends Controller
         }
 
         return ApiResponse::success(null, 'Item removed from cart');
+    }
+
+    public function clear()
+    {
+        $this->cartService->clearCart(auth()->user());
+
+        return ApiResponse::success(null, 'Cart cleared');
     }
 }

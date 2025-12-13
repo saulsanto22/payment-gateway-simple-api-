@@ -31,4 +31,9 @@ class CartRepository
 
         return (bool) $cart->delete();
     }
+
+    public function clear($userId)
+    {
+        return Cart::where('user_id', $userId)->delete();
+    }
 }

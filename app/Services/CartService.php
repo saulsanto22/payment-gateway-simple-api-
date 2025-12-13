@@ -23,8 +23,18 @@ class CartService
         return $this->cartRepository->addOrUpdate($user->id, $productId, $quantity);
     }
 
+    public function updateItem($user, $productId, $quantity)
+    {
+        return $this->cartRepository->addOrUpdate($user->id, $productId, $quantity);
+    }
+
     public function removeItem($user, $productId)
     {
         return $this->cartRepository->remove($user->id, $productId);
+    }
+
+    public function clearCart($user)
+    {
+        return $this->cartRepository->clear($user->id);
     }
 }

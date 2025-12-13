@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Exceptions\OutOfStockException;
 use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
+use App\Repositories\ProductRepository;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -15,11 +17,18 @@ class OrderService
 
     protected CartRepository $cartRepository;
 
-    public function __construct(MidtransService $midtransService, OrderRepository $orderRepository, CartRepository $cartRepository)
-    {
+    protected ProductRepository $productRepository;
+
+    public function __construct(
+        MidtransService $midtransService,
+        OrderRepository $orderRepository,
+        CartRepository $cartRepository,
+        ProductRepository $productRepository
+    ) {
         $this->midtransService = $midtransService;
         $this->orderRepository = $orderRepository;
         $this->cartRepository = $cartRepository;
+        $this->productRepository = $productRepository;
     }
 
     public function checkout($user)
@@ -38,8 +47,18 @@ class OrderService
         $order = null;
 
         DB::transaction(function () use ($user, $cartItems, $total, &$order) {
+            // 1. Periksa stok & kunci produk dalam transaksi
+            foreach ($cartItems as $item) {
+                $product = $this->productRepository->findWithLock($item->product_id);
+                if ($product->stock < $item->quantity) {
+                    throw new OutOfStockException('Product '.$product->name.' is out of stock.');
+                }
+            }
+
+            // 2. Buat pesanan
             $order = $this->orderRepository->createOrder($user->id, $total);
 
+            // 3. Tambahkan item pesanan
             foreach ($cartItems as $item) {
                 $this->orderRepository->addOrderItem(
                     $order->id,
@@ -49,10 +68,8 @@ class OrderService
                 );
             }
 
-            // bersihkan cart dalam transaksi agar konsisten
-            foreach ($cartItems as $item) {
-                $item->delete();
-            }
+            // 4. Bersihkan keranjang (stok TIDAK dikurangi di sini)
+            $this->cartRepository->clear($user->id);
         });
 
         // refresh relasi items & user untuk Midtrans payload
@@ -91,7 +108,8 @@ class OrderService
     public function updateProductStock($order)
     {
         foreach ($order->items as $item) {
-            $product = $item->product;
+            // Gunakan findWithLock lagi untuk keamanan saat update
+            $product = $this->productRepository->findWithLock($item->product_id);
             $product->decrement('stock', $item->quantity);
         }
     }

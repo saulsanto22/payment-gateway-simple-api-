@@ -3,24 +3,52 @@
 namespace App\Repositories;
 
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductRepository
 {
     /**
-     * Listing produk dengan filter dan sort yang aman.
-     * Param:
-     * - q: cari nama (contains)
-     * - min_price, max_price: filter rentang harga
-     * - sort_by: name|price|created_at (whitelist)
-     * - sort_dir: asc|desc
-     * - perPage: 1..100
+     * Mengambil semua produk. 
+     * Metode ini lebih cocok untuk backend admin.
      */
-    public function all($perPage = 15, ?string $q = null, ?float $minPrice = null, ?float $maxPrice = null, ?string $sortBy = null, ?string $sortDir = null)
+    public function getAll(): Collection
+    {
+        return Product::all();
+    }
+
+    /**
+     * Membuat produk baru.
+     */
+    public function create(array $data): Product
+    {
+        return Product::create($data);
+    }
+
+    /**
+     * Mengupdate produk yang ada.
+     */
+    public function update(Product $product, array $data): Product
+    {
+        $product->update($data);
+        return $product;
+    }
+
+    /**
+     * Menghapus produk.
+     */
+    public function delete(Product $product): void
+    {
+        $product->delete();
+    }
+
+    /**
+     * Listing produk dengan filter dan sort yang aman untuk sisi pengguna.
+     */
+    public function search($perPage = 15, ?string $q = null, ?float $minPrice = null, ?float $maxPrice = null, ?string $sortBy = null, ?string $sortDir = null)
     {
         $query = Product::query();
 
         if ($q !== null && $q !== '') {
-            // contains; gunakan index name (LIKE '%q%') tidak selalu gunakan index, tapi cukup untuk portfolio
             $query->where('name', 'like', '%'.str_replace('%', '\\%', $q).'%');
         }
 
@@ -44,5 +72,13 @@ class ProductRepository
         $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 15;
 
         return $query->paginate($perPage);
+    }
+
+    /**
+     * Mencari produk berdasarkan ID dengan lock untuk mencegah race condition.
+     */
+    public function findWithLock($productId): Product
+    {
+        return Product::where('id', $productId)->lockForUpdate()->firstOrFail();
     }
 }
