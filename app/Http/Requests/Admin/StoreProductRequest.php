@@ -30,6 +30,8 @@ class StoreProductRequest extends FormRequest
             'description' => 'required|string',
             'price' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi setiap file di dalam array
         ];
     }
 }
