@@ -5,7 +5,6 @@ namespace App\Services\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
@@ -42,7 +41,7 @@ class AuthService
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Register error: ' . $e->getMessage());
+            \Log::error('Register error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -57,7 +56,7 @@ class AuthService
             'password' => $data['password'],
         ];
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (! $token = JWTAuth::attempt($credentials)) {
             return null; // Login gagal
         }
 

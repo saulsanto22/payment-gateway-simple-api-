@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductImageRepository; // Akan dibuat selanjutnya
+use App\Repositories\ProductImageRepository;
+use App\Repositories\ProductRepository; // Akan dibuat selanjutnya
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 
 class ProductService
 {
     protected $productRepository;
+
     protected $productImageRepository;
 
     public function __construct(ProductRepository $productRepository, ProductImageRepository $productImageRepository)
@@ -22,24 +23,24 @@ class ProductService
     /**
      * Membuat produk baru beserta gambarnya.
      *
-     * @param array $data Data produk dari request yang sudah divalidasi.
-     * @param array|null $images Array dari file gambar yang di-upload.
-     * @return \App\Models\Product
+     * @param  array  $data  Data produk dari request yang sudah divalidasi.
+     * @param  array|null  $images  Array dari file gambar yang di-upload.
+     *
      * @throws \Exception
      */
-    public function createProductWithImages(array $data, ?array $images):
+    public function createProductWithImages(array $data, ?array $images): \App\Models\Product
     {
         return DB::transaction(function () use ($data, $images) {
             // 1. Buat produk utama
             $product = $this->productRepository->create($data);
 
             // 2. Jika ada gambar, proses dan simpan
-            if (!empty($images)) {
+            if (! empty($images)) {
                 foreach ($images as $imageFile) {
                     if ($imageFile instanceof UploadedFile) {
                         // Simpan file ke storage/app/public/products
                         $path = $imageFile->store('public/products');
-                        
+
                         // Buat entri gambar di database melalui repository
                         $this->productImageRepository->create([
                             'product_id' => $product->id,
@@ -48,7 +49,7 @@ class ProductService
                     }
                 }
             }
-            
+
             // Muat relasi gambar agar termuat di model produk yang dikembalikan
             $product->load('images');
 

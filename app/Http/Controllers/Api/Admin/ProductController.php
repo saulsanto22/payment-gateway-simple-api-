@@ -8,8 +8,8 @@ use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Product;
 use App\Services\ProductService; // <-- Menggunakan ProductService
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -28,6 +28,7 @@ class ProductController extends Controller
     {
         // Untuk saat ini, kita bisa tetap menggunakan query sederhana atau memindahkannya ke service/repository jika lebih kompleks
         $products = Product::with('images')->latest()->get();
+
         return ApiResponse::success($products, 'Products fetched successfully for admin.');
     }
 
@@ -37,7 +38,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
-        
+
         // Pisahkan data produk dan file gambar
         $productData = collect($validatedData)->except('images')->toArray();
         $images = $request->file('images');
@@ -45,10 +46,10 @@ class ProductController extends Controller
         try {
             // Panggil service untuk menangani logika pembuatan produk dan gambar
             $product = $this->productService->createProductWithImages($productData, $images);
-            
+
             return ApiResponse::success($product, 'Product created successfully.', 201);
         } catch (\Exception $e) {
-            return ApiResponse::error('Failed to create product: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Failed to create product: '.$e->getMessage(), 500);
         }
     }
 
@@ -58,6 +59,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('images');
+
         return ApiResponse::success($product, 'Product fetched successfully.');
     }
 
@@ -70,6 +72,7 @@ class ProductController extends Controller
         // Untuk saat ini, kita biarkan sederhana. Nanti bisa dipindah ke service.
         $product->update($request->validated());
         $product->load('images');
+
         return ApiResponse::success($product, 'Product updated successfully.');
     }
 

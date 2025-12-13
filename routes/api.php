@@ -47,10 +47,9 @@ Route::middleware(['auth:api', 'throttle:api'])->group(function () {
     });
 });
 
-
 // --- ADMIN ROUTES ---
 Route::middleware(['auth:api', 'throttle:api', 'role:admin'])->prefix('admin')->group(function () {
-    
+
     /**
      * Route resource untuk admin mengelola produk.
      * Ini akan secara otomatis membuat route untuk:
@@ -65,7 +64,6 @@ Route::middleware(['auth:api', 'throttle:api', 'role:admin'])->prefix('admin')->
     // Di sini Anda bisa menambahkan route admin lainnya di masa depan
     // Contoh: Route::get('/orders', [AdminOrderController::class, 'index']);
 });
-
 
 // Webhook dari Midtrans
 Route::post('/midtrans/webhook', [OrderController::class, 'webhook'])

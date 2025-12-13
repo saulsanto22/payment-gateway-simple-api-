@@ -9,7 +9,7 @@ class MigrateUsersToSpatieSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Migrate existing users dari old role column ke Spatie roles
      */
     public function run(): void

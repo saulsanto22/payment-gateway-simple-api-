@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 class ProductRepository
 {
     /**
-     * Mengambil semua produk. 
+     * Mengambil semua produk.
      * Metode ini lebih cocok untuk backend admin.
      */
     public function getAll(): Collection
@@ -30,6 +30,7 @@ class ProductRepository
     public function update(Product $product, array $data): Product
     {
         $product->update($data);
+
         return $product;
     }
 

@@ -42,7 +42,7 @@ class PermissionSeeder extends Seeder
         $this->command->info('Permissions created successfully!');
         $this->command->table(
             ['Permission Name'],
-            collect($permissions)->map(fn($p) => [$p])->toArray()
+            collect($permissions)->map(fn ($p) => [$p])->toArray()
         );
     }
 }
