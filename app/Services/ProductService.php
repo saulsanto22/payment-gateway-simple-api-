@@ -4,15 +4,16 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductImage;
-use App\Repositories\ProductRepository;
 use App\Repositories\ProductImageRepository;
+use App\Repositories\ProductRepository;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 
 class ProductService
 {
     protected $productRepository;
+
     protected $productImageRepository;
 
     public function __construct(ProductRepository $productRepository, ProductImageRepository $productImageRepository)
@@ -24,9 +25,9 @@ class ProductService
     /**
      * Membuat produk baru beserta gambarnya.
      *
-     * @param array $data Data produk dari request.
-     * @param array|null $images Array dari file gambar.
-     * @return Product
+     * @param  array  $data  Data produk dari request.
+     * @param  array|null  $images  Array dari file gambar.
+     *
      * @throws \Exception
      */
     public function createProductWithImages(array $data, ?array $images): Product
@@ -34,7 +35,7 @@ class ProductService
         return DB::transaction(function () use ($data, $images) {
             $product = $this->productRepository->create($data);
 
-            if (!empty($images)) {
+            if (! empty($images)) {
                 foreach ($images as $imageFile) {
                     if ($imageFile instanceof UploadedFile) {
                         $path = $imageFile->store('public/products');
@@ -45,8 +46,9 @@ class ProductService
                     }
                 }
             }
-            
+
             $product->load('images');
+
             return $product;
         });
     }
@@ -54,21 +56,16 @@ class ProductService
     /**
      * Mengupdate produk, termasuk menambah/menghapus gambar.
      *
-     * @param Product $product
-     * @param array $productData
-     * @param array|null $newImages
-     * @param array|null $imagesToDeleteIds
-     * @return Product
      * @throws \Exception
      */
     public function updateProduct(Product $product, array $productData, ?array $newImages, ?array $imagesToDeleteIds): Product
     {
         return DB::transaction(function () use ($product, $productData, $newImages, $imagesToDeleteIds) {
-            if (!empty($productData)) {
+            if (! empty($productData)) {
                 $this->productRepository->update($product, $productData);
             }
 
-            if (!empty($imagesToDeleteIds)) {
+            if (! empty($imagesToDeleteIds)) {
                 $imagesToDelete = ProductImage::whereIn('id', $imagesToDeleteIds)->get();
                 foreach ($imagesToDelete as $image) {
                     $storagePath = str_replace('/storage', 'public', $image->image_path);
@@ -77,7 +74,7 @@ class ProductService
                 }
             }
 
-            if (!empty($newImages)) {
+            if (! empty($newImages)) {
                 foreach ($newImages as $imageFile) {
                     if ($imageFile instanceof UploadedFile) {
                         $path = $imageFile->store('public/products');
@@ -90,6 +87,7 @@ class ProductService
             }
 
             $product->refresh()->load('images');
+
             return $product;
         });
     }
@@ -97,8 +95,6 @@ class ProductService
     /**
      * Menghapus produk beserta semua file gambarnya.
      *
-     * @param Product $product
-     * @return void
      * @throws \Exception
      */
     public function deleteProduct(Product $product): void

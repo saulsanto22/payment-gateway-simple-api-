@@ -24,6 +24,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with('images')->latest()->get();
+
         return ApiResponse::success($products, 'Products fetched successfully for admin.');
     }
 
@@ -38,9 +39,10 @@ class ProductController extends Controller
 
         try {
             $product = $this->productService->createProductWithImages($productData, $images);
+
             return ApiResponse::success($product, 'Product created successfully.', 201);
         } catch (\Exception $e) {
-            return ApiResponse::error('Failed to create product: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Failed to create product: '.$e->getMessage(), 500);
         }
     }
 
@@ -50,6 +52,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('images');
+
         return ApiResponse::success($product, 'Product fetched successfully.');
     }
 
@@ -74,7 +77,7 @@ class ProductController extends Controller
 
             return ApiResponse::success($updatedProduct, 'Product updated successfully.');
         } catch (\Exception $e) {
-            return ApiResponse::error('Failed to update product: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Failed to update product: '.$e->getMessage(), 500);
         }
     }
 
@@ -85,9 +88,10 @@ class ProductController extends Controller
     {
         try {
             $this->productService->deleteProduct($product);
+
             return ApiResponse::success(null, 'Product deleted successfully.');
         } catch (\Exception $e) {
-            return ApiResponse::error('Failed to delete product: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Failed to delete product: '.$e->getMessage(), 500);
         }
     }
 }
