@@ -50,9 +50,17 @@ class ReminderUnpaidOrder extends Command
             $orders = $this->orderRepository->GetPendingOrder();
 
             foreach ($orders as $order) {
-                // Dispatch email reminder job
-                SendOrderReminderJob::dispatch($order);
-                Log::info('Reminder email dispatched to: ' . $order->user->email);
+                // BEST PRACTICE: Pass ID instead of Model
+                // WHY: Avoid serialization issues & stale data
+                // Dispatch ke queue 'emails' (low priority)
+                SendOrderReminderJob::dispatch($order->id)
+                    ->onQueue('emails');
+                    
+                Log::info('Reminder email dispatched', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'email' => $order->user->email,
+                ]);
             }
 
             Log::info('Reminder command triggered at ' . now());

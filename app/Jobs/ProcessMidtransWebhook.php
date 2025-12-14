@@ -18,13 +18,44 @@ class ProcessMidtransWebhook implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Create a new job instance.
+     * The payload dari Midtrans webhook.
      */
     protected $payload;
 
-    protected $tries = 3;
+    /**
+     * Jumlah maksimal retry jika job gagal.
+     * 
+     * BEST PRACTICE: 3-5x untuk external API
+     * - Jika Midtrans down sementara, akan retry
+     * - Jika signature invalid, tidak perlu retry (akan return di handle)
+     */
+    public $tries = 3;
 
-    protected $timeout = 120;
+    /**
+     * Maximum waktu eksekusi job (seconds).
+     * 
+     * BEST PRACTICE: 30-120s untuk webhook processing
+     * - Prevent job hanging forever
+     * - Webhook seharusnya quick (validasi + update DB)
+     */
+    public $timeout = 90;
+
+    /**
+     * Delay antar retry (exponential backoff).
+     * 
+     * WHY: Kasih waktu external service untuk recovery
+     * - Retry 1: tunggu 10 detik
+     * - Retry 2: tunggu 30 detik  
+     * - Retry 3: tunggu 60 detik
+     */
+    public $backoff = [10, 30, 60];
+
+    /**
+     * Maximum exceptions sebelum job dianggap failed.
+     * 
+     * BEST PRACTICE: Sama dengan $tries
+     */
+    public $maxExceptions = 3;
 
     public function __construct($payload)
     {
@@ -119,6 +150,7 @@ class ProcessMidtransWebhook implements ShouldQueue
             Log::info('Successfully processed Midtrans webhook', [
                 'order_id' => $orderId,
                 'status' => $updatedOrder->status,
+                'attempt' => $this->attempts(), // Track retry attempt
             ]);
 
         } catch (\Exception $e) {
@@ -126,11 +158,59 @@ class ProcessMidtransWebhook implements ShouldQueue
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'payload' => $this->payload,
+                'attempt' => $this->attempts(),
+                'max_tries' => $this->tries,
             ]);
 
             // Re-throw exception agar job bisa di-retry
             throw $e;
         }
+    }
 
+    /**
+     * Handle job failure setelah semua retry habis.
+     * 
+     * METHOD INI DIPANGGIL OTOMATIS saat:
+     * - Job sudah di-retry $tries kali dan masih gagal
+     * - Job di-fail() secara manual
+     * 
+     * USE CASE:
+     * - Kirim alert ke developer (Slack, Email, Telegram)
+     * - Log ke external monitoring (Sentry, Bugsnag)
+     * - Rollback atau compensating action
+     * - Update order status ke "payment_failed"
+     */
+    public function failed(\Throwable $exception): void
+    {
+        Log::critical('Midtrans webhook job failed permanently', [
+            'job' => self::class,
+            'payload' => $this->payload,
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'attempts' => $this->attempts(),
+        ]);
+
+        // TODO: Kirim alert ke developer
+        // Slack::send("🚨 Payment webhook failed for order: {$this->payload['order_id']}");
+        
+        // TODO: Update order status jika perlu
+        // Order::where('order_number', $this->payload['order_id'])
+        //     ->update(['status' => OrderStatus::PAYMENT_FAILED]);
+    }
+
+    /**
+     * Get tags untuk monitoring di Horizon.
+     * 
+     * WHY: Memudahkan filtering dan debugging di dashboard
+     * - Bisa filter job berdasarkan order_id
+     * - Bisa track performance per order
+     */
+    public function tags(): array
+    {
+        return [
+            'webhook',
+            'midtrans',
+            'order:' . ($this->payload['order_id'] ?? 'unknown'),
+        ];
     }
 }

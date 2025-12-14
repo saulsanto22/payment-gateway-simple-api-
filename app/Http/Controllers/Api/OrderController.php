@@ -63,7 +63,9 @@ class OrderController extends Controller
             'fraud_status' => 'sometimes|string',
         ]);
 
-        ProcessMidtransWebhook::dispatch($payload);
+        // BEST PRACTICE: Dispatch ke queue 'webhooks' (high priority)
+        ProcessMidtransWebhook::dispatch($payload)
+            ->onQueue('webhooks');
 
         return ApiResponse::success(null, 'Webhook received and queued for processing');
     }
