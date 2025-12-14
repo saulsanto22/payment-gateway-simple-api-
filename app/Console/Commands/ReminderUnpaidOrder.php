@@ -6,6 +6,7 @@ use App\Jobs\SendOrderReminderJob;
 use App\Models\Order;
 use App\Repositories\OrderRepository;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class ReminderUnpaidOrder extends Command
 {
@@ -23,35 +24,42 @@ class ReminderUnpaidOrder extends Command
      */
     protected $description = 'Send reminders for unpaid orders';
 
-    protected $orderRepository;
+    /**
+     * The OrderRepository instance.
+     *
+     * @var OrderRepository
+     */
+    private $orderRepository;
 
     /**
-     * Execute the console command.
+     * Create a new command instance.
      */
-
-    // buat depedensi injection untuk orderRepository
     public function __construct(OrderRepository $orderRepository)
     {
         parent::__construct();
         $this->orderRepository = $orderRepository;
-
     }
 
+    /**
+     * Execute the console command.
+     */
     public function handle()
     {
+        try {
+            // Retrieve unpaid orders
+            $orders = $this->orderRepository->GetPendingOrder();
 
-        // ambil data order yang statusnya unpaid dan kirimkan email reminder
-        $orders = $this->orderRepository->GetPendingOrder();
+            foreach ($orders as $order) {
+                // Dispatch email reminder job
+                SendOrderReminderJob::dispatch($order);
+                Log::info('Reminder email dispatched to: ' . $order->user->email);
+            }
 
-        foreach ($orders as $order) {
-            // kirim email reminder
-            SendOrderReminderJob::dispatch($order);
-            \Log::info($order->user->email);
-
+            Log::info('Reminder command triggered at ' . now());
+            $this->info('Reminder emails dispatched for ' . count($orders) . ' unpaid orders.');
+        } catch (\Exception $e) {
+            Log::error('Error in ReminderUnpaidOrder command: ' . $e->getMessage());
+            $this->error('An error occurred while dispatching reminder emails.');
         }
-        \Log::info('Reminder command triggered at '.now());
-
-        $this->info('Reminder emails dispatched for '.count($orders).' unpaid orders.');
-
     }
 }

@@ -15,7 +15,7 @@ class Order extends Model
     protected $table = 'orders';
 
     protected $fillable = [
-        'user_id',
+        'user_id', 
         'order_number', // digunakan sebagai order_id di Midtrans
         'total_price',
         'status',
