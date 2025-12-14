@@ -20,25 +20,29 @@ class ProductController extends Controller
 
     /**
      * Admin: List all products
-     * 
+     *
      * @OA\Get(
      *     path="/api/admin/products",
      *     tags={"Admin - Products"},
      *     summary="Admin - Lihat semua produk",
      *     description="Get semua produk untuk admin (termasuk yang out of stock)",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Success - Return all products",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Products fetched successfully for admin."),
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
+     *
      *                 @OA\Items(
      *                     type="object",
+     *
      *                     @OA\Property(property="id", type="integer", example=5),
      *                     @OA\Property(property="name", type="string", example="Gaming Laptop"),
      *                     @OA\Property(property="description", type="string"),
@@ -47,8 +51,10 @@ class ProductController extends Controller
      *                     @OA\Property(
      *                         property="images",
      *                         type="array",
+     *
      *                         @OA\Items(
      *                             type="object",
+     *
      *                             @OA\Property(property="id", type="integer"),
      *                             @OA\Property(property="image_url", type="string")
      *                         )
@@ -57,7 +63,7 @@ class ProductController extends Controller
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthenticated"
@@ -77,20 +83,23 @@ class ProductController extends Controller
 
     /**
      * Admin: Create new product
-     * 
+     *
      * @OA\Post(
      *     path="/api/admin/products",
      *     tags={"Admin - Products"},
      *     summary="Admin - Buat produk baru",
      *     description="Create produk baru dengan upload gambar (multipart/form-data)",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"name", "price", "stock"},
+     *
      *                 @OA\Property(property="name", type="string", example="Gaming Laptop"),
      *                 @OA\Property(property="description", type="string", example="High-end gaming laptop with RTX 4090"),
      *                 @OA\Property(property="price", type="number", format="float", example=15000000),
@@ -99,16 +108,19 @@ class ProductController extends Controller
      *                     property="images[]",
      *                     type="array",
      *                     description="Upload multiple images (optional)",
+     *
      *                     @OA\Items(type="string", format="binary")
      *                 )
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Product created successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Product created successfully."),
      *             @OA\Property(
@@ -121,7 +133,7 @@ class ProductController extends Controller
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error"
@@ -149,26 +161,29 @@ class ProductController extends Controller
 
     /**
      * Admin: Get single product detail
-     * 
+     *
      * @OA\Get(
      *     path="/api/admin/products/{product}",
      *     tags={"Admin - Products"},
      *     summary="Admin - Detail 1 produk",
      *     description="Get detail produk termasuk semua gambar",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Parameter(
      *         name="product",
      *         in="path",
      *         required=true,
      *         description="Product ID",
+     *
      *         @OA\Schema(type="integer", example=5)
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Success",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Product fetched successfully."),
      *             @OA\Property(
@@ -182,8 +197,10 @@ class ProductController extends Controller
      *                 @OA\Property(
      *                     property="images",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer"),
      *                         @OA\Property(property="image_url", type="string")
      *                     )
@@ -191,7 +208,7 @@ class ProductController extends Controller
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Product not found"
@@ -211,27 +228,31 @@ class ProductController extends Controller
 
     /**
      * Admin: Update product
-     * 
+     *
      * @OA\Post(
      *     path="/api/admin/products/{product}",
      *     tags={"Admin - Products"},
      *     summary="Admin - Update produk",
      *     description="Update product data, upload new images, atau delete existing images. NOTE: Gunakan POST dengan _method=PUT untuk support file upload",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Parameter(
      *         name="product",
      *         in="path",
      *         required=true,
      *         description="Product ID",
+     *
      *         @OA\Schema(type="integer", example=5)
      *     ),
-     *     
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="_method", type="string", example="PUT", description="Laravel method spoofing"),
      *                 @OA\Property(property="name", type="string", example="Gaming Laptop Updated"),
      *                 @OA\Property(property="description", type="string", example="Updated description"),
@@ -241,27 +262,32 @@ class ProductController extends Controller
      *                     property="images[]",
      *                     type="array",
      *                     description="Upload new images (optional)",
+     *
      *                     @OA\Items(type="string", format="binary")
      *                 ),
+     *
      *                 @OA\Property(
      *                     property="images_to_delete[]",
      *                     type="array",
      *                     description="Array of image IDs to delete (optional)",
+     *
      *                     @OA\Items(type="integer", example=1)
      *                 )
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Product updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Product updated successfully.")
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Product not found"
@@ -300,31 +326,34 @@ class ProductController extends Controller
 
     /**
      * Admin: Delete product
-     * 
+     *
      * @OA\Delete(
      *     path="/api/admin/products/{product}",
      *     tags={"Admin - Products"},
      *     summary="Admin - Hapus produk",
      *     description="Delete produk beserta semua gambarnya",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Parameter(
      *         name="product",
      *         in="path",
      *         required=true,
      *         description="Product ID",
+     *
      *         @OA\Schema(type="integer", example=5)
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Product deleted successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Product deleted successfully.")
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Product not found"

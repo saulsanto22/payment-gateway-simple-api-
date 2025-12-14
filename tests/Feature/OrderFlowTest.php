@@ -1,22 +1,22 @@
 <?php
 
-use App\Models\User;
-use App\Models\Product;
+use App\Enums\OrderStatus;
 use App\Models\Cart;
 use App\Models\Order;
-use App\Enums\OrderStatus;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 uses(RefreshDatabase::class);
 
 describe('Order Flow - Checkout & History', function () {
-    
+
     beforeEach(function () {
         // Setup user dan token
         $this->user = User::factory()->create();
         $this->token = JWTAuth::fromUser($this->user);
-        $this->headers = ['Authorization' => 'Bearer ' . $this->token];
+        $this->headers = ['Authorization' => 'Bearer '.$this->token];
     });
 
     it('user dapat checkout cart menjadi order', function () {
@@ -35,24 +35,24 @@ describe('Order Flow - Checkout & History', function () {
 
         // Action: Checkout
         $response = $this->withHeaders($this->headers)
-                         ->postJson('/api/orders/checkout');
+            ->postJson('/api/orders/checkout');
 
         // Assert: Response success
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                     'message' => 'Checkout successfully',
-                 ])
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'order_number',
-                         'total_price',
-                         'status',
-                         'snap_token',
-                         'redirect_url',
-                     ]
-                 ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'Checkout successfully',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'order_number',
+                    'total_price',
+                    'status',
+                    'snap_token',
+                    'redirect_url',
+                ],
+            ]);
 
         // Assert: Order dibuat di database
         $this->assertDatabaseHas('orders', [
@@ -77,7 +77,7 @@ describe('Order Flow - Checkout & History', function () {
         Cart::create(['user_id' => $this->user->id, 'product_id' => $product2->id, 'quantity' => 1]);
 
         $response = $this->withHeaders($this->headers)
-                         ->postJson('/api/orders/checkout');
+            ->postJson('/api/orders/checkout');
 
         $response->assertStatus(200);
 
@@ -92,13 +92,13 @@ describe('Order Flow - Checkout & History', function () {
 
     it('checkout gagal jika cart kosong', function () {
         $response = $this->withHeaders($this->headers)
-                         ->postJson('/api/orders/checkout');
+            ->postJson('/api/orders/checkout');
 
         $response->assertStatus(422)
-                 ->assertJson([
-                     'success' => false,
-                     'message' => 'Cart is empty.',
-                 ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'Cart is empty.',
+            ]);
 
         // Pastikan tidak ada order dibuat
         $this->assertDatabaseMissing('orders', [
@@ -119,12 +119,12 @@ describe('Order Flow - Checkout & History', function () {
         ]);
 
         $response = $this->withHeaders($this->headers)
-                         ->postJson('/api/orders/checkout');
+            ->postJson('/api/orders/checkout');
 
         $response->assertStatus(422)
-                 ->assertJsonFragment([
-                     'success' => false,
-                 ]);
+            ->assertJsonFragment([
+                'success' => false,
+            ]);
 
         // Pastikan tidak ada order dibuat
         $this->assertDatabaseMissing('orders', [
@@ -139,12 +139,12 @@ describe('Order Flow - Checkout & History', function () {
         ]);
 
         $response = $this->withHeaders($this->headers)
-                         ->getJson('/api/orders/history');
+            ->getJson('/api/orders/history');
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                 ]);
+            ->assertJson([
+                'success' => true,
+            ]);
     });
 
     it('user hanya melihat order miliknya sendiri', function () {
@@ -162,25 +162,25 @@ describe('Order Flow - Checkout & History', function () {
         ]);
 
         $response = $this->withHeaders($this->headers)
-                         ->getJson('/api/orders/history');
+            ->getJson('/api/orders/history');
 
         $response->assertStatus(200);
 
         $responseData = $response->json('data');
-        
+
         // Jika pagination, ambil data array
         $orders = isset($responseData['data']) ? $responseData['data'] : $responseData;
-        
+
         // Harus ada minimal 1 order dan semua milik user ini
         expect(count($orders))->toBeGreaterThanOrEqual(1);
-        
+
         // Cek order pertama milik user ini
         expect($orders[0]['order_number'])->toContain('ORD-USER1');
     });
 
     it('order memiliki order_number yang unique', function () {
         $product = Product::factory()->create(['price' => 100000, 'stock' => 10]);
-        
+
         // Checkout 1
         Cart::create(['user_id' => $this->user->id, 'product_id' => $product->id, 'quantity' => 1]);
         $response1 = $this->withHeaders($this->headers)->postJson('/api/orders/checkout');
@@ -197,16 +197,16 @@ describe('Order Flow - Checkout & History', function () {
 
     it('order memiliki snap_token dan redirect_url dari Midtrans', function () {
         $product = Product::factory()->create(['price' => 100000, 'stock' => 10]);
-        
+
         Cart::create(['user_id' => $this->user->id, 'product_id' => $product->id, 'quantity' => 1]);
-        
+
         $response = $this->withHeaders($this->headers)
-                         ->postJson('/api/orders/checkout');
+            ->postJson('/api/orders/checkout');
 
         $response->assertStatus(200);
 
         $data = $response->json('data');
-        
+
         // Snap token dan redirect URL harus ada (dari Midtrans)
         expect($data['snap_token'])->not->toBeNull();
         expect($data['redirect_url'])->not->toBeNull();

@@ -25,18 +25,20 @@ class OrderController extends Controller
 
     /**
      * Checkout cart to create order
-     * 
+     *
      * @OA\Post(
      *     path="/api/orders/checkout",
      *     tags={"Orders"},
      *     summary="Checkout - Buat order dari cart",
      *     description="Proses checkout: validasi stok, buat order, generate payment token Midtrans, kurangi stok produk",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Checkout berhasil - Order created dan payment token generated",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Checkout successfully"),
      *             @OA\Property(
@@ -50,8 +52,10 @@ class OrderController extends Controller
      *                 @OA\Property(
      *                     property="items",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="product_id", type="integer", example=5),
      *                         @OA\Property(property="product_name", type="string", example="Product Name"),
      *                         @OA\Property(property="quantity", type="integer", example=2),
@@ -61,16 +65,18 @@ class OrderController extends Controller
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error - Cart kosong atau stok tidak cukup",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Cart is empty.")
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthenticated"
@@ -94,26 +100,29 @@ class OrderController extends Controller
 
     /**
      * Get order history
-     * 
+     *
      * @OA\Get(
      *     path="/api/orders/history",
      *     tags={"Orders"},
      *     summary="Lihat riwayat order",
      *     description="Get semua order user dengan pagination",
      *     security={{"bearerAuth":{}}},
-     *     
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Jumlah item per page (default 15, max 100)",
+     *
      *         @OA\Schema(type="integer", example=15, minimum=1, maximum=100)
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Success - Return paginated order history",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="History successfully"),
      *             @OA\Property(
@@ -125,8 +134,10 @@ class OrderController extends Controller
      *                 @OA\Property(
      *                     property="data",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=10),
      *                         @OA\Property(property="order_number", type="string", example="ORD-1234567890"),
      *                         @OA\Property(property="total_amount", type="number", format="float", example=250000),
@@ -137,7 +148,7 @@ class OrderController extends Controller
      *             )
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthenticated"
@@ -156,18 +167,20 @@ class OrderController extends Controller
 
     /**
      * Midtrans payment webhook
-     * 
+     *
      * @OA\Post(
      *     path="/api/midtrans/webhook",
      *     tags={"Webhooks"},
      *     summary="Webhook dari Midtrans",
      *     description="Receive payment notification dari Midtrans, diproses async via queue 'webhooks' (high priority)",
-     *     
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Payload dari Midtrans payment notification",
+     *
      *         @OA\JsonContent(
      *             required={"order_id", "status_code", "gross_amount", "signature_key", "transaction_status"},
+     *
      *             @OA\Property(property="order_id", type="string", example="ORD-1234567890", description="Order number"),
      *             @OA\Property(property="status_code", type="string", example="200", description="Status code dari Midtrans"),
      *             @OA\Property(property="gross_amount", type="string", example="250000.00", description="Total amount"),
@@ -176,16 +189,18 @@ class OrderController extends Controller
      *             @OA\Property(property="fraud_status", type="string", example="accept", description="Optional: accept, challenge, deny")
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Webhook diterima dan queued for processing",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Webhook received and queued for processing")
      *         )
      *     ),
-     *     
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error - Payload tidak lengkap"

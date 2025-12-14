@@ -18,7 +18,7 @@ class OrderFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
-            'order_number' => 'ORD-' . now()->format('YmdHis') . '-' . strtoupper(fake()->lexify('?????')),
+            'order_number' => 'ORD-'.now()->format('YmdHis').'-'.strtoupper(fake()->lexify('?????')),
             'total_price' => fake()->numberBetween(50000, 500000),
             'status' => \App\Enums\OrderStatus::PENDING,
             'snap_token' => fake()->optional()->uuid(),

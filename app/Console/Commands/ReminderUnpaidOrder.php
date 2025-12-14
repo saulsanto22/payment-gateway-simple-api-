@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendOrderReminderJob;
-use App\Models\Order;
 use App\Repositories\OrderRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -55,7 +54,7 @@ class ReminderUnpaidOrder extends Command
                 // Dispatch ke queue 'emails' (low priority)
                 SendOrderReminderJob::dispatch($order->id)
                     ->onQueue('emails');
-                    
+
                 Log::info('Reminder email dispatched', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
@@ -63,10 +62,10 @@ class ReminderUnpaidOrder extends Command
                 ]);
             }
 
-            Log::info('Reminder command triggered at ' . now());
-            $this->info('Reminder emails dispatched for ' . count($orders) . ' unpaid orders.');
+            Log::info('Reminder command triggered at '.now());
+            $this->info('Reminder emails dispatched for '.count($orders).' unpaid orders.');
         } catch (\Exception $e) {
-            Log::error('Error in ReminderUnpaidOrder command: ' . $e->getMessage());
+            Log::error('Error in ReminderUnpaidOrder command: '.$e->getMessage());
             $this->error('An error occurred while dispatching reminder emails.');
         }
     }

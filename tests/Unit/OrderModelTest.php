@@ -1,19 +1,19 @@
 <?php
 
-use App\Models\Order;
-use App\Models\User;
-use App\Models\OrderItem;
 use App\Enums\OrderStatus;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 describe('Order Model', function () {
-    
+
     it('dapat membuat order dengan atribut yang benar', function () {
         // Buat user dulu
         $user = User::factory()->create();
-        
+
         // Buat order
         $order = Order::factory()->create([
             'user_id' => $user->id,
@@ -43,14 +43,14 @@ describe('Order Model', function () {
         $order = Order::factory()->create();
         $product1 = \App\Models\Product::factory()->create();
         $product2 = \App\Models\Product::factory()->create();
-        
+
         // Buat order items dengan produk berbeda
         $order->items()->create([
             'product_id' => $product1->id,
             'quantity' => 2,
             'price' => 50000,
         ]);
-        
+
         $order->items()->create([
             'product_id' => $product2->id,
             'quantity' => 1,

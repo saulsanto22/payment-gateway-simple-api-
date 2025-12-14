@@ -7,10 +7,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 describe('ProductImage Model', function () {
-    
+
     it('dapat membuat product image dengan atribut yang benar', function () {
         $product = Product::factory()->create();
-        
+
         $productImage = ProductImage::create([
             'product_id' => $product->id,
             'image_path' => '/storage/products/laptop.jpg',
@@ -32,7 +32,7 @@ describe('ProductImage Model', function () {
 
     it('dapat membuat multiple images untuk satu produk', function () {
         $product = Product::factory()->create();
-        
+
         ProductImage::factory()->count(3)->create([
             'product_id' => $product->id,
         ]);
@@ -43,7 +43,7 @@ describe('ProductImage Model', function () {
     it('dapat menghapus image', function () {
         $productImage = ProductImage::factory()->create();
         $imageId = $productImage->id;
-        
+
         $productImage->delete();
 
         $this->assertDatabaseMissing('product_images', [

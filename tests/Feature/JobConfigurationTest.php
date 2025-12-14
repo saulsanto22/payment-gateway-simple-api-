@@ -4,7 +4,6 @@ use App\Enums\OrderStatus;
 use App\Jobs\ProcessMidtransWebhook;
 use App\Jobs\SendOrderReminderJob;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Queue;
 uses(RefreshDatabase::class)->group('feature', 'jobs');
 
 describe('Job Configuration & Best Practices', function () {
-    
+
     beforeEach(function () {
         $this->user = User::factory()->create();
         $this->product = Product::factory()->create([
@@ -39,7 +38,7 @@ describe('Job Configuration & Best Practices', function () {
             ->and($job->timeout)->toBe(90) // 90s timeout
             ->and($job->backoff)->toBe([10, 30, 60]) // Exponential backoff
             ->and($job->maxExceptions)->toBe(3);
-            
+
         // Queue name di-set via onQueue() saat dispatch, bukan via property
     });
 
@@ -57,7 +56,7 @@ describe('Job Configuration & Best Practices', function () {
         expect($job->tries)->toBe(5) // 5x retry untuk email
             ->and($job->timeout)->toBe(60) // 60s timeout
             ->and($job->backoff)->toBe([60, 120, 300, 600]); // Longer backoff untuk email
-            
+
         // Queue name di-set via onQueue() saat dispatch, bukan via property
     });
 
@@ -118,12 +117,12 @@ describe('Job Configuration & Best Practices', function () {
         // Assert: Tags untuk monitoring
         expect($tags)->toContain('email')
             ->and($tags)->toContain('reminder')
-            ->and($tags)->toContain('order:' . $order->id);
+            ->and($tags)->toContain('order:'.$order->id);
     });
 });
 
 describe('Job Queue Priority', function () {
-    
+
     it('webhook job masuk ke queue webhooks (high priority)', function () {
         Queue::fake();
 
@@ -159,7 +158,7 @@ describe('Job Queue Priority', function () {
 });
 
 describe('Job Retry & Backoff', function () {
-    
+
     it('webhook job retry dengan exponential backoff', function () {
         $payload = [
             'order_id' => 'ORD-TEST',

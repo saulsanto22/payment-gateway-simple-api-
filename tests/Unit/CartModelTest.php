@@ -1,18 +1,18 @@
 <?php
 
 use App\Models\Cart;
-use App\Models\User;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 describe('Cart Model', function () {
-    
+
     it('dapat membuat cart dengan atribut yang benar', function () {
         $user = User::factory()->create();
         $product = Product::factory()->create();
-        
+
         $cart = Cart::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
@@ -43,7 +43,7 @@ describe('Cart Model', function () {
 
     it('dapat mengupdate quantity', function () {
         $cart = Cart::factory()->create(['quantity' => 1]);
-        
+
         $cart->quantity = 5;
         $cart->save();
 

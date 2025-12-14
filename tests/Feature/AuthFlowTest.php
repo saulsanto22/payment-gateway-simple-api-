@@ -7,7 +7,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 uses(RefreshDatabase::class);
 
 describe('Auth Flow - Register & Login', function () {
-    
+
     beforeEach(function () {
         // Seed role customer untuk test
         \Spatie\Permission\Models\Role::create(['name' => 'customer', 'guard_name' => 'web']);
@@ -22,16 +22,16 @@ describe('Auth Flow - Register & Login', function () {
         ]);
 
         $response->assertStatus(201)
-                 ->assertJsonStructure([
-                     'success',
-                     'data' => [
-                         'user' => ['id', 'name', 'email'],
-                         'access_token',
-                         'token_type',
-                         'expires_in',
-                     ],
-                     'message'
-                 ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'user' => ['id', 'name', 'email'],
+                    'access_token',
+                    'token_type',
+                    'expires_in',
+                ],
+                'message',
+            ]);
 
         // Cek user ada di database
         $this->assertDatabaseHas('users', [
@@ -55,7 +55,7 @@ describe('Auth Flow - Register & Login', function () {
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     });
 
     it('register gagal jika password kurang dari 8 karakter', function () {
@@ -67,7 +67,7 @@ describe('Auth Flow - Register & Login', function () {
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
     });
 
     it('user dapat login dengan kredensial yang benar', function () {
@@ -83,19 +83,19 @@ describe('Auth Flow - Register & Login', function () {
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'success',
-                     'data' => [
-                         'access_token',
-                         'token_type',
-                         'expires_in',
-                     ],
-                     'message'
-                 ])
-                 ->assertJson([
-                     'success' => true,
-                     'message' => 'Login successfully',
-                 ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'access_token',
+                    'token_type',
+                    'expires_in',
+                ],
+                'message',
+            ])
+            ->assertJson([
+                'success' => true,
+                'message' => 'Login successfully',
+            ]);
     });
 
     it('login gagal dengan password yang salah', function () {
@@ -110,10 +110,10 @@ describe('Auth Flow - Register & Login', function () {
         ]);
 
         $response->assertStatus(401)
-                 ->assertJson([
-                     'success' => false,
-                     'message' => 'Invalid credentials',
-                 ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ]);
     });
 
     it('user dapat mengakses endpoint yang dilindungi dengan token', function () {
@@ -121,13 +121,13 @@ describe('Auth Flow - Register & Login', function () {
         $token = JWTAuth::fromUser($user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->getJson('/api/auth/me');
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                 ]);
+            ->assertJson([
+                'success' => true,
+            ]);
     });
 
     it('akses ditolak tanpa token', function () {
@@ -141,12 +141,12 @@ describe('Auth Flow - Register & Login', function () {
         $token = JWTAuth::fromUser($user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/auth/logout');
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                 ]);
+            ->assertJson([
+                'success' => true,
+            ]);
     });
 });

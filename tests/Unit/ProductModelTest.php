@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 describe('Product Model', function () {
-    
+
     it('dapat membuat produk dengan atribut yang benar', function () {
         $product = Product::factory()->create([
             'name' => 'Laptop Gaming',
@@ -24,7 +24,7 @@ describe('Product Model', function () {
 
     it('memiliki relasi hasMany dengan ProductImage', function () {
         $product = Product::factory()->create();
-        
+
         // Buat beberapa gambar untuk produk
         ProductImage::factory()->count(3)->create([
             'product_id' => $product->id,
@@ -36,7 +36,7 @@ describe('Product Model', function () {
 
     it('dapat mengurangi stok produk', function () {
         $product = Product::factory()->create(['stock' => 10]);
-        
+
         // Simulasi pengurangan stok
         $product->stock = $product->stock - 2;
         $product->save();

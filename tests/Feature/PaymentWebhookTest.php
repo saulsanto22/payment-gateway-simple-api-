@@ -14,7 +14,7 @@ uses(RefreshDatabase::class)->group('feature', 'webhook');
 beforeEach(function () {
     // Setup user & product untuk setiap test
     $this->user = User::factory()->create();
-    
+
     $this->product = Product::factory()->create([
         'stock' => 10,
         'price' => 100000,
@@ -22,7 +22,7 @@ beforeEach(function () {
 });
 
 describe('Payment Webhook - Midtrans Notification', function () {
-    
+
     it('webhook menerima notifikasi dan masuk ke queue', function () {
         Queue::fake();
 
@@ -39,7 +39,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '100000.00';
         $transactionStatus = 'settlement';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -52,10 +52,10 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $response = $this->postJson('/api/midtrans/webhook', $payload);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                     'message' => 'Webhook received and queued for processing',
-                 ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'Webhook received and queued for processing',
+            ]);
 
         // Pastikan job masuk ke queue
         Queue::assertPushed(ProcessMidtransWebhook::class);
@@ -109,7 +109,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '200000.00';
         $transactionStatus = 'settlement';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -156,7 +156,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '100000.00';
         $transactionStatus = 'pending';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -196,7 +196,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '100000.00';
         $transactionStatus = 'cancel';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -229,7 +229,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '100000.00';
         $transactionStatus = 'expire';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -268,7 +268,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '100000.00';
         $transactionStatus = 'cancel';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,
@@ -298,7 +298,7 @@ describe('Payment Webhook - Midtrans Notification', function () {
         $grossAmount = '999999.00'; // Salah! Harusnya 100000.00
         $transactionStatus = 'settlement';
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $orderId,

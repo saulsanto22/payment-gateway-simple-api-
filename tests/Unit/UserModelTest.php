@@ -1,14 +1,13 @@
 <?php
 
 use App\Models\User;
-use App\Models\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
 describe('User Model', function () {
-    
+
     it('dapat membuat user dengan atribut yang benar', function () {
         $user = User::create([
             'name' => 'John Doe',
@@ -24,9 +23,9 @@ describe('User Model', function () {
 
     it('email harus unique', function () {
         User::factory()->create(['email' => 'test@example.com']);
-        
+
         // Coba buat user dengan email yang sama
-        expect(fn() => User::create([
+        expect(fn () => User::create([
             'name' => 'Another User',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
@@ -44,7 +43,7 @@ describe('User Model', function () {
     it('dapat assign role customer', function () {
         // Buat role customer dulu
         \Spatie\Permission\Models\Role::create(['name' => 'customer', 'guard_name' => 'web']);
-        
+
         $user = User::factory()->create();
         $user->assignRole('customer');
 

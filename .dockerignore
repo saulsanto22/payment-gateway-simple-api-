@@ -1,0 +1,71 @@
+# ============================================
+# .dockerignore - Exclude files dari Docker build
+# ============================================
+# Analogi: Packing koper liburan - jangan bawa barang
+# yang ga kepake (hemat space & waktu build)
+# ============================================
+
+# Dependencies (akan diinstall fresh di container)
+/vendor
+/node_modules
+
+# Laravel specific
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+
+# Environment files (security - jangan masuk ke image!)
+.env
+.env.*
+
+# IDE & Editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Testing
+/tests
+/phpunit.xml
+/.phpunit.result.cache
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker files (ga perlu masuk ke image)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+/docs
+
+# CI/CD
+.github
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

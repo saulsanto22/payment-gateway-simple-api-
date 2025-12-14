@@ -39,15 +39,15 @@ Artisan::command('inspire', function () {
 
 /**
  * Send reminder emails untuk unpaid orders
- * 
+ *
  * SCHEDULE: Setiap hari jam 10:00 AM (WIB)
  * WHY: Customer biasanya cek email pagi hari (9-11 AM)
- * 
+ *
  * FLOW:
  * 1. Command cari semua order dengan status PENDING
  * 2. Untuk setiap order, dispatch SendOrderReminderJob ke queue 'emails'
  * 3. Queue worker (emails) akan kirim email reminder
- * 
+ *
  * BEST PRACTICES yang di-apply:
  * - withoutOverlapping(): Prevent command jalan 2x parallel (kalau yg lama belum selesai)
  * - onOneServer(): Kalau multi-server, hanya 1 server yang jalankan
@@ -61,7 +61,7 @@ Schedule::command('order:reminder-unpaid-order')
 
 /**
  * TODO: Add more scheduled tasks sesuai kebutuhan
- * 
+ *
  * Contoh tasks yang umum:
  * - Database backup (daily/weekly)
  * - Cleanup old logs (weekly)

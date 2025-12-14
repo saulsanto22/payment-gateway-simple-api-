@@ -19,7 +19,7 @@ class SendOrderReminderJob implements ShouldQueue
 
     /**
      * Order ID (bukan model!).
-     * 
+     *
      * BEST PRACTICE: Pass ID, bukan Model
      * WHY:
      * - Model di-serialize ke queue (bisa stale data)
@@ -31,19 +31,19 @@ class SendOrderReminderJob implements ShouldQueue
 
     /**
      * Jumlah maksimal retry.
-     * 
+     *
      * CONTEXT: Email sending bisa gagal karena:
      * - SMTP server down
      * - Rate limiting
      * - Network issues
-     * 
+     *
      * BEST PRACTICE: 5x untuk email (lebih toleran)
      */
     public $tries = 5;
 
     /**
      * Maximum execution time.
-     * 
+     *
      * BEST PRACTICE: 60s cukup untuk email
      * - Email sending biasanya quick (1-5s)
      * - Kalau >60s, kemungkinan ada masalah
@@ -52,7 +52,7 @@ class SendOrderReminderJob implements ShouldQueue
 
     /**
      * Exponential backoff untuk retry.
-     * 
+     *
      * WHY: Email provider sering punya rate limit
      * - Retry terlalu cepat = kena rate limit lagi
      * - Backoff kasih waktu rate limit reset
@@ -66,7 +66,7 @@ class SendOrderReminderJob implements ShouldQueue
 
     /**
      * Execute the job.
-     * 
+     *
      * FLOW:
      * 1. Fetch order dari DB (fresh data)
      * 2. Validasi order masih pending
@@ -80,10 +80,11 @@ class SendOrderReminderJob implements ShouldQueue
             $order = Order::with('user')->find($this->orderId);
 
             // Validasi: Order mungkin sudah tidak ada (dihapus)
-            if (!$order) {
+            if (! $order) {
                 Log::warning('Order not found for reminder', [
                     'order_id' => $this->orderId,
                 ]);
+
                 return; // Skip, tidak perlu retry
             }
 
@@ -93,14 +94,16 @@ class SendOrderReminderJob implements ShouldQueue
                     'order_id' => $this->orderId,
                     'status' => $order->status->value,
                 ]);
+
                 return; // Skip, tidak perlu retry
             }
 
             // Validasi: User mungkin tidak ada email (edge case)
-            if (!$order->user || !$order->user->email) {
+            if (! $order->user || ! $order->user->email) {
                 Log::warning('User email not found for order reminder', [
                     'order_id' => $this->orderId,
                 ]);
+
                 return; // Skip, tidak perlu retry
             }
 
@@ -158,7 +161,7 @@ class SendOrderReminderJob implements ShouldQueue
         return [
             'email',
             'reminder',
-            'order:' . $this->orderId,
+            'order:'.$this->orderId,
         ];
     }
 }

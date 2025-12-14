@@ -24,7 +24,7 @@ class ProcessMidtransWebhook implements ShouldQueue
 
     /**
      * Jumlah maksimal retry jika job gagal.
-     * 
+     *
      * BEST PRACTICE: 3-5x untuk external API
      * - Jika Midtrans down sementara, akan retry
      * - Jika signature invalid, tidak perlu retry (akan return di handle)
@@ -33,7 +33,7 @@ class ProcessMidtransWebhook implements ShouldQueue
 
     /**
      * Maximum waktu eksekusi job (seconds).
-     * 
+     *
      * BEST PRACTICE: 30-120s untuk webhook processing
      * - Prevent job hanging forever
      * - Webhook seharusnya quick (validasi + update DB)
@@ -42,17 +42,17 @@ class ProcessMidtransWebhook implements ShouldQueue
 
     /**
      * Delay antar retry (exponential backoff).
-     * 
+     *
      * WHY: Kasih waktu external service untuk recovery
      * - Retry 1: tunggu 10 detik
-     * - Retry 2: tunggu 30 detik  
+     * - Retry 2: tunggu 30 detik
      * - Retry 3: tunggu 60 detik
      */
     public $backoff = [10, 30, 60];
 
     /**
      * Maximum exceptions sebelum job dianggap failed.
-     * 
+     *
      * BEST PRACTICE: Sama dengan $tries
      */
     public $maxExceptions = 3;
@@ -169,11 +169,11 @@ class ProcessMidtransWebhook implements ShouldQueue
 
     /**
      * Handle job failure setelah semua retry habis.
-     * 
+     *
      * METHOD INI DIPANGGIL OTOMATIS saat:
      * - Job sudah di-retry $tries kali dan masih gagal
      * - Job di-fail() secara manual
-     * 
+     *
      * USE CASE:
      * - Kirim alert ke developer (Slack, Email, Telegram)
      * - Log ke external monitoring (Sentry, Bugsnag)
@@ -192,7 +192,7 @@ class ProcessMidtransWebhook implements ShouldQueue
 
         // TODO: Kirim alert ke developer
         // Slack::send("🚨 Payment webhook failed for order: {$this->payload['order_id']}");
-        
+
         // TODO: Update order status jika perlu
         // Order::where('order_number', $this->payload['order_id'])
         //     ->update(['status' => OrderStatus::PAYMENT_FAILED]);
@@ -200,7 +200,7 @@ class ProcessMidtransWebhook implements ShouldQueue
 
     /**
      * Get tags untuk monitoring di Horizon.
-     * 
+     *
      * WHY: Memudahkan filtering dan debugging di dashboard
      * - Bisa filter job berdasarkan order_id
      * - Bisa track performance per order
@@ -210,7 +210,7 @@ class ProcessMidtransWebhook implements ShouldQueue
         return [
             'webhook',
             'midtrans',
-            'order:' . ($this->payload['order_id'] ?? 'unknown'),
+            'order:'.($this->payload['order_id'] ?? 'unknown'),
         ];
     }
 }
