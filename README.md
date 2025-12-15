@@ -9,8 +9,9 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/Tests-52_Passing-00C853?style=for-the-badge&logo=checkmarx&logoColor=white)](#testing)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitLab-FCA121?style=for-the-badge&logo=gitlab&logoColor=white)](docs/CICD_DEPLOYMENT_TUTORIAL.md)
 
-[🚀 Live Demo](#) • [📖 Dokumentasi API](http://localhost:8000/api/documentation) • [📊 Arsitektur](#arsitektur) • [🧪 Testing](#testing)
+[🚀 Live Demo](#) • [📖 Dokumentasi API](http://localhost:8000/api/documentation) • [📊 Arsitektur](#arsitektur) • [🧪 Testing](#testing) • [⚙️ CI/CD](docs/CICD_DEPLOYMENT_TUTORIAL.md)
 
 </div>
 
@@ -130,72 +131,72 @@ Project ini mengikuti prinsip **Clean Architecture** dengan pemisahan concerns y
 
 ---
 
-## 🐳 Quick Start with Docker (Recommended)
+## 🐳 Quick Start dengan Docker (Rekomendasi)
 
 ### Prerequisites
-- Docker Desktop installed ([Download](https://www.docker.com/products/docker-desktop))
-- Git installed
+- Docker Desktop terinstal ([Download](https://www.docker.com/products/docker-desktop))
+- Git terinstal
 
-### Run in 3 Commands
+### Jalankan dengan 3 Command
 
 ```bash
-# 1. Clone & navigate
-git clone <your-repo-url>
+# 1. Clone & masuk ke folder
+git clone <url-repo-anda>
 cd payment-gateway-simple-api-
 
-# 2. Start all containers (Laravel, PostgreSQL, Redis, MailHog)
+# 2. Start semua container (Laravel, PostgreSQL, Redis, MailHog)
 docker-compose -f docker-compose.dev.yml up -d
 
-# 3. Run database migrations
+# 3. Jalankan database migrations
 docker-compose -f docker-compose.dev.yml exec app php artisan migrate --seed
 ```
 
-**🎉 Done!** API available at: http://localhost:8000
+**🎉 Selesai!** API tersedia di: http://localhost:8000
 
-**Services Running:**
+**Services yang Berjalan:**
 - 🌐 API Server: http://localhost:8000
-- 📖 API Documentation: http://localhost:8000/api/documentation
+- 📖 Dokumentasi API: http://localhost:8000/api/documentation
 - 📧 MailHog UI: http://localhost:8025
 - 🐘 PostgreSQL: localhost:5432
 - 🔴 Redis: localhost:6379
 
-**View Logs:**
+**Lihat Logs:**
 ```bash
 docker-compose -f docker-compose.dev.yml logs -f app
 ```
 
-**Stop Containers:**
+**Stop Container:**
 ```bash
 docker-compose -f docker-compose.dev.yml down
 ```
 
-> 📚 **Need Help with Docker?** Check [DOCKER_SETUP_GUIDE.md](docs/DOCKER_SETUP_GUIDE.md) for complete explanations.
+> 📚 **Butuh Bantuan dengan Docker?** Lihat [DOCKER_SETUP_GUIDE.md](docs/DOCKER_SETUP_GUIDE.md) untuk penjelasan lengkap.
 
 ---
 
-## 💻 Local Installation (Without Docker)
+## 💻 Instalasi Lokal (Tanpa Docker)
 
 ### Prerequisites
 - PHP 8.4+
 - Composer
 - PostgreSQL 16+
-- Redis (optional, can use `sync` driver)
+- Redis (opsional, bisa pakai driver `sync`)
 
-### Steps
+### Langkah-Langkah
 
 ```bash
 # 1. Clone repository
-git clone <your-repo-url>
+git clone <url-repo-anda>
 cd payment-gateway-simple-api-
 
 # 2. Install dependencies
 composer install
 
-# 3. Configure environment
+# 3. Konfigurasi environment
 cp .env.example .env
 php artisan key:generate
 
-# 4. Configure database in .env
+# 4. Konfigurasi database di .env
 # DB_CONNECTION=pgsql
 # DB_HOST=127.0.0.1
 # DB_PORT=5432
@@ -203,35 +204,35 @@ php artisan key:generate
 # DB_USERNAME=your_user
 # DB_PASSWORD=your_password
 
-# 5. Run migrations & seeders
+# 5. Jalankan migrations & seeders
 php artisan migrate --seed
 
 # 6. Start development server
 php artisan serve
 
-# 7. (Optional) Start queue worker
+# 7. (Opsional) Start queue worker
 php artisan queue:work
 
-# 8. (Optional) Start task scheduler (in cron or separate terminal)
+# 8. (Opsional) Start task scheduler (di cron atau terminal terpisah)
 php artisan schedule:work
 ```
 
-**API available at:** http://localhost:8000
+**API tersedia di:** http://localhost:8000
 
 ---
 
-## 🔑 Midtrans Configuration
+## 🔑 Konfigurasi Midtrans
 
-### 1. Create Midtrans Account
-Sign up at [Midtrans Dashboard](https://dashboard.midtrans.com/)
+### 1. Buat Akun Midtrans
+Daftar di [Midtrans Dashboard](https://dashboard.midtrans.com/)
 
-### 2. Get API Keys (Sandbox Mode)
-- Navigate to **Settings** → **Access Keys**
-- Copy **Server Key** and **Client Key**
+### 2. Dapatkan API Keys (Mode Sandbox)
+- Masuk ke **Settings** → **Access Keys**
+- Copy **Server Key** dan **Client Key**
 
-### 3. Configure Environment Variables
+### 3. Konfigurasi Environment Variables
 
-Add to your `.env` file:
+Tambahkan ke file `.env` Anda:
 
 ```env
 MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxxxxxx
@@ -241,107 +242,110 @@ MIDTRANS_IS_SANITIZED=true
 MIDTRANS_IS_3DS=true
 ```
 
-### 4. Setup Webhook URL (Important!)
+### 4. Setup Webhook URL (Penting!)
 
-In Midtrans Dashboard:
-- Go to **Settings** → **Configuration**
-- Set **Payment Notification URL** to:
+Di Midtrans Dashboard:
+- Masuk ke **Settings** → **Configuration**
+- Set **Payment Notification URL** ke:
   ```
-  https://your-domain.com/api/midtrans/webhook
+  https://domain-anda.com/api/midtrans/webhook
   ```
-- For local testing with ngrok:
+- Untuk testing lokal dengan ngrok:
   ```bash
   ngrok http 8000
-  # Use: https://xxxx.ngrok.io/api/midtrans/webhook
+  # Gunakan: https://xxxx.ngrok.io/api/midtrans/webhook
   ```
 
-### 5. Test Payment
+### 5. Test Pembayaran
 
-Use Midtrans test cards ([Full List](https://docs.midtrans.com/en/technical-reference/sandbox-test)):
+Gunakan kartu test Midtrans ([Daftar Lengkap](https://docs.midtrans.com/en/technical-reference/sandbox-test)):
 
-| Card Number | Result |
-|-------------|--------|
+| Nomor Kartu | Hasil |
+|-------------|-------|
 | `4811 1111 1111 1114` | Success |
-| `4911 1111 1111 1113` | Denied |
+| `4911 1111 1111 1113` | Ditolak |
 
 ---
 
-## 📡 API Documentation
+## 📡 Dokumentasi API
 
 ### Interactive Swagger UI
 
-Explore all **17 endpoints** with live testing:
+Eksplorasi semua **17 endpoints** dengan live testing:
 
 **🔗 [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)**
 
-### Endpoints Overview
+### Daftar Endpoints
 
-#### 🔐 Authentication (2 endpoints)
+#### 🔐 Autentikasi (2 endpoints)
 ```http
-POST   /api/register     # Register new user
-POST   /api/login        # Login & get bearer token
+POST   /api/auth/register     # Register user baru
+POST   /api/auth/login        # Login & dapatkan bearer token
+POST   /api/auth/refresh      # Refresh JWT token
+POST   /api/auth/logout       # Logout
+GET    /api/auth/me           # Get user profile
 ```
 
 #### 🛍️ Products (3 endpoints)
 ```http
-GET    /api/products          # List all products
-GET    /api/products/{id}     # Get product details
-POST   /api/products          # Create product (Admin)
+GET    /api/products          # List semua produk
+GET    /api/products/{id}     # Detail produk
+POST   /api/products          # Buat produk baru (Admin)
 ```
 
 #### 🛒 Cart (3 endpoints)
 ```http
-POST   /api/cart/add          # Add product to cart
-GET    /api/cart              # View cart items
-DELETE /api/cart/{id}         # Remove item from cart
+POST   /api/cart/add          # Tambah produk ke cart
+GET    /api/cart              # Lihat isi cart
+DELETE /api/cart/{id}         # Hapus item dari cart
 ```
 
 #### 📦 Orders (4 endpoints)
 ```http
-POST   /api/orders/checkout   # Checkout cart → create order
-GET    /api/orders            # List user's orders
-GET    /api/orders/{id}       # Get order details
-POST   /api/orders/{id}/cancel # Cancel unpaid order
+POST   /api/orders/checkout   # Checkout cart → buat order
+GET    /api/orders            # List order user
+GET    /api/orders/{id}       # Detail order
+POST   /api/orders/{id}/cancel # Cancel order belum dibayar
 ```
 
 #### 💳 Payments (3 endpoints)
 ```http
-POST   /api/payments/create-snap-token  # Get Midtrans token
-POST   /api/payments/verify              # Verify payment status
-GET    /api/payments/history             # Payment history
+POST   /api/payments/create-snap-token  # Dapatkan token Midtrans
+POST   /api/payments/verify              # Verifikasi status pembayaran
+GET    /api/payments/history             # History pembayaran
 ```
 
 #### 🔔 Webhooks (2 endpoints)
 ```http
-POST   /api/midtrans/webhook      # Midtrans payment callback
+POST   /api/midtrans/webhook      # Callback pembayaran Midtrans
 POST   /api/webhooks/test         # Test webhook handler
 ```
 
-### Example Request
+### Contoh Request
 
 ```bash
 # 1. Register
-curl -X POST http://localhost:8000/api/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"John","email":"john@example.com","password":"password123"}'
+  -d '{"name":"John","email":"john@example.com","password":"password123","password_confirmation":"password123"}'
 
 # 2. Login
-curl -X POST http://localhost:8000/api/login \
+curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"password123"}'
 
-# 3. Add to Cart (use token from login)
+# 3. Tambah ke Cart (gunakan token dari login)
 curl -X POST http://localhost:8000/api/cart/add \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"product_id":1,"quantity":2}'
 ```
 
-> 💡 **Tip:** Import [LaravelShop.postman_collection.json](LaravelShop.postman_collection.json) for pre-configured requests.
+> 💡 **Tip:** Import [LaravelShop.postman_collection.json](LaravelShop.postman_collection.json) untuk request yang sudah dikonfigurasi.
 
 ---
 
-## 💳 Payment Flow
+## 💳 Alur Pembayaran
 
 ```mermaid
 sequenceDiagram
@@ -352,94 +356,94 @@ sequenceDiagram
     participant DB as Database
 
     U->>FE: Register & Login
-    FE->>BE: POST /api/login
-    BE-->>FE: Bearer Token
+    FE->>BE: POST /api/auth/login
+    BE-->>FE: JWT Bearer Token
     
-    U->>FE: Add Products to Cart
+    U->>FE: Tambah Produk ke Cart
     FE->>BE: POST /api/cart/add
     BE-->>FE: Cart Updated
     
     U->>FE: Checkout
     FE->>BE: POST /api/orders/checkout
-    BE->>DB: Create Order (status: pending)
+    BE->>DB: Buat Order (status: pending)
     BE->>MT: Request Snap Token
     MT-->>BE: Snap Token
     BE-->>FE: Snap Token
     
-    FE->>MT: Open Payment UI (snap.pay)
-    U->>MT: Complete Payment
+    FE->>MT: Buka Payment UI (snap.pay)
+    U->>MT: Selesaikan Pembayaran
     MT->>BE: Webhook Notification
-    BE->>DB: Update Order Status (paid)
-    BE->>U: Send Email (Queue)
+    BE->>DB: Update Status Order (paid)
+    BE->>U: Kirim Email (Queue)
     MT-->>FE: Payment Success
-    FE-->>U: Show Confirmation
+    FE-->>U: Tampilkan Konfirmasi
 ```
 
-**Steps:**
-1. **Register/Login** → Get authentication token
-2. **Browse Products** → View available items
-3. **Add to Cart** → Select products & quantities
-4. **Checkout** → Backend creates order & requests Midtrans token
-5. **Pay** → Frontend displays Midtrans payment UI
-6. **Webhook** → Midtrans notifies backend of payment status
-7. **Update** → Backend updates order & sends email notification
+**Langkah-Langkah:**
+1. **Register/Login** → Dapatkan authentication token
+2. **Browse Products** → Lihat produk yang tersedia
+3. **Tambah ke Cart** → Pilih produk & quantity
+4. **Checkout** → Backend buat order & request token Midtrans
+5. **Bayar** → Frontend tampilkan UI pembayaran Midtrans
+6. **Webhook** → Midtrans notifikasi backend tentang status pembayaran
+7. **Update** → Backend update order & kirim email notifikasi
 
 ---
 
 ## 🧪 Testing
 
-### Run All Tests (52 tests)
+### Jalankan Semua Tests (52 tests)
 
 ```bash
-# Using Pest
+# Menggunakan Pest
 ./vendor/bin/pest
 
-# Using PHPUnit
+# Menggunakan PHPUnit
 php artisan test
 
-# With coverage
+# Dengan coverage
 php artisan test --coverage
 ```
 
-### Test Structure
+### Struktur Test
 
 ```
 tests/
 ├── Feature/              # Integration tests
 │   ├── AuthTest.php     # Registration & login
-│   ├── CartTest.php     # Cart operations
-│   ├── OrderTest.php    # Order creation & flow
-│   └── PaymentTest.php  # Midtrans integration
+│   ├── CartTest.php     # Operasi cart
+│   ├── OrderTest.php    # Pembuatan order & flow
+│   └── PaymentTest.php  # Integrasi Midtrans
 └── Unit/                # Unit tests
-    ├── Services/        # Service layer tests
-    ├── Repositories/    # Repository tests
-    └── Models/          # Model relationship tests
+    ├── Services/        # Test service layer
+    ├── Repositories/    # Test repository
+    └── Models/          # Test relasi model
 ```
 
-### Test Coverage Highlights
+### Highlight Test Coverage
 
-- ✅ **52 passing tests** covering:
-  - Authentication flows
-  - Cart operations (add, update, delete)
-  - Order lifecycle (pending → paid → completed)
-  - Payment processing & webhooks
-  - Stock validation & restoration
+- ✅ **52 passing tests** mencakup:
+  - Alur autentikasi
+  - Operasi cart (add, update, delete)
+  - Lifecycle order (pending → paid → completed)
+  - Proses pembayaran & webhooks
+  - Validasi & restorasi stok
   - Email queue jobs
   - Repository patterns
-  - Service layer logic
+  - Logika service layer
 
-### Example Test Output
+### Contoh Test Output
 
 ```
 PASS  Tests\Feature\AuthTest
-✓ user can register with valid data
-✓ user cannot register with invalid email
-✓ user can login with correct credentials
+✓ user dapat register dengan data valid
+✓ user tidak dapat register dengan email invalid
+✓ user dapat login dengan kredensial benar
 
 PASS  Tests\Feature\OrderTest
-✓ user can checkout cart and create order
-✓ order status updates on payment confirmation
-✓ stock reduces after successful order
+✓ user dapat checkout cart dan buat order
+✓ status order ter-update saat konfirmasi pembayaran
+✓ stok berkurang setelah order sukses
 
 Tests:    52 passed (146 assertions)
 Duration: 3.24s
@@ -447,43 +451,43 @@ Duration: 3.24s
 
 ---
 
-## 🔄 Queue System
+## 🔄 Sistem Queue
 
 ### Background Jobs
 
-The application uses **Redis-backed queues** for async processing:
+Aplikasi menggunakan **Redis-backed queues** untuk proses async:
 
 #### 📧 Email Jobs
-- **SendOrderReminderJob** - Sends reminder for unpaid orders
-- **OrderConfirmationMail** - Confirmation email after payment
+- **SendOrderReminderJob** - Kirim pengingat untuk order belum dibayar
+- **OrderConfirmationMail** - Email konfirmasi setelah pembayaran
 
 #### 🔔 Webhook Processing
-- **ProcessMidtransWebhook** - Handles Midtrans payment notifications
-- Retry strategy: 3 attempts with exponential backoff
+- **ProcessMidtransWebhook** - Handle notifikasi pembayaran Midtrans
+- Strategi retry: 3 percobaan dengan exponential backoff
 
 ### Start Queue Worker
 
 ```bash
-# Process jobs from default queue
+# Proses jobs dari default queue
 php artisan queue:work
 
-# With options
+# Dengan options
 php artisan queue:work --queue=high,default,low --tries=3 --timeout=90
 
-# In Docker
+# Di Docker
 docker-compose -f docker-compose.dev.yml exec app php artisan queue:work
 ```
 
 ### Monitor Queues
 
 ```bash
-# View failed jobs
+# Lihat failed jobs
 php artisan queue:failed
 
 # Retry failed job
 php artisan queue:retry {id}
 
-# Clear failed jobs
+# Hapus failed jobs
 php artisan queue:flush
 ```
 
@@ -493,25 +497,25 @@ php artisan queue:flush
 
 ### Automated Tasks
 
-The scheduler runs these commands automatically:
+Scheduler menjalankan command ini secara otomatis:
 
-| Task | Schedule | Description |
-|------|----------|-------------|
-| **Order Reminders** | Daily 10:00 AM | Send reminder for unpaid orders |
-| **Cleanup Old Carts** | Daily 2:00 AM | Remove abandoned carts (7+ days) |
-| **Cache Refresh** | Every 6 hours | Refresh product cache |
+| Task | Jadwal | Deskripsi |
+|------|--------|------------|
+| **Order Reminders** | Harian jam 10:00 | Kirim pengingat untuk order belum dibayar |
+| **Cleanup Old Carts** | Harian jam 02:00 | Hapus cart yang ditinggalkan (7+ hari) |
+| **Cache Refresh** | Setiap 6 jam | Refresh cache produk |
 
-### Start Scheduler (Local)
+### Start Scheduler (Lokal)
 
 ```bash
-# Option 1: Continuous mode (development)
+# Opsi 1: Continuous mode (development)
 php artisan schedule:work
 
-# Option 2: Add to cron (production)
-* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+# Opsi 2: Tambahkan ke cron (production)
+* * * * * cd /path-ke-project && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-### View Scheduled Tasks
+### Lihat Scheduled Tasks
 
 ```bash
 php artisan schedule:list
@@ -519,113 +523,139 @@ php artisan schedule:list
 
 ---
 
-## 📂 Project Structure
+## 📂 Struktur Project
 
 ```
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/    # API endpoints
-│   │   ├── Requests/       # Validation rules
-│   │   └── Resources/      # Response formatting
+│   │   ├── Requests/       # Aturan validasi
+│   │   └── Resources/      # Format response
 │   ├── Services/           # Business logic
 │   ├── Repositories/       # Data access layer
 │   ├── Models/             # Eloquent models
 │   ├── Jobs/               # Queue jobs
-│   ├── Mail/               # Email templates
+│   ├── Mail/               # Template email
 │   ├── Enums/              # Status enums
-│   └── Helpers/            # Helper functions
+│   └── Helpers/            # Fungsi helper
 ├── database/
-│   ├── migrations/         # Database schema
-│   ├── seeders/            # Test data
+│   ├── migrations/         # Schema database
+│   ├── seeders/            # Data testing
 │   └── factories/          # Model factories
 ├── tests/
 │   ├── Feature/            # Integration tests
 │   └── Unit/               # Unit tests
 ├── docs/
-│   ├── DOCKER_SETUP_GUIDE.md      # Complete Docker tutorial
-│   └── GITLAB_CICD_SETUP.md       # CI/CD implementation guide
+│   ├── DOCKER_SETUP_GUIDE.md          # Tutorial Docker lengkap
+│   ├── GITLAB_CICD_SETUP.md           # Panduan CI/CD (konsep)
+│   └── CICD_DEPLOYMENT_TUTORIAL.md    # Tutorial CI/CD step-by-step 🆕
 ├── docker-compose.dev.yml  # Development containers
 ├── Dockerfile.dev          # PHP 8.4 + extensions
-└── README.md               # This file
+├── .gitlab-ci.yml          # GitLab CI/CD pipeline config 🆕
+└── README.md               # File ini
 ```
 
 ---
 
 ## 🚀 Deployment
 
-### Option 1: Railway (Recommended for beginners)
+### 🎯 Tutorial CI/CD Lengkap (Recommended!)
 
-**Free tier available, automatic HTTPS, easy setup**
+**Pelajari cara deploy otomatis dengan GitLab CI/CD:**
 
-1. Push code to GitHub/GitLab
-2. Connect Railway to your repository
-3. Add PostgreSQL database addon
-4. Set environment variables
-5. Deploy automatically on push
+📖 **[Baca Tutorial: CI/CD Deployment Step-by-Step](docs/CICD_DEPLOYMENT_TUTORIAL.md)**
 
-> 📖 **Complete Guide:** See [docs/GITLAB_CICD_SETUP.md](docs/GITLAB_CICD_SETUP.md) for CI/CD automation
+**Yang akan kamu pelajari:**
+- ✅ Setup GitLab CI/CD Pipeline dari nol
+- ✅ Automated testing (52 tests) setiap push
+- ✅ Build Docker image otomatis
+- ✅ Deploy ke Railway dengan 1 klik
+- ✅ Environment variables management
+- ✅ Production monitoring
 
-### Option 2: VPS (DigitalOcean, Linode, AWS)
+**Estimasi waktu:** 30-45 menit
 
-Use Docker Compose for production:
+---
+
+### Opsi 1: Deploy dengan CI/CD (Railway)
+
+**Otomatis testing & deployment dengan GitLab CI/CD**
+
+1. Setup GitLab repository & Railway account
+2. Konfigurasi `.gitlab-ci.yml` (sudah ada!)
+3. Setup CI/CD variables di GitLab
+4. Push code → Pipeline otomatis running
+5. Klik tombol "Deploy" untuk production
+
+> 📖 **Tutorial Lengkap:** [docs/CICD_DEPLOYMENT_TUTORIAL.md](docs/CICD_DEPLOYMENT_TUTORIAL.md)
+
+**Keuntungan:**
+- ✅ Automated testing sebelum deploy
+- ✅ Zero-downtime deployment
+- ✅ Rollback mudah jika ada error
+- ✅ Professional workflow
+
+### Opsi 2: VPS (DigitalOcean, Linode, AWS)
+
+Gunakan Docker Compose untuk production:
 
 ```bash
-# On server
+# Di server
 docker-compose -f docker-compose.prod.yml up -d
 docker-compose exec app php artisan migrate --force
 ```
 
-### Environment Checklist
+### Checklist Environment
 
-Before deploying to production:
+Sebelum deploy ke production:
 
 - [ ] Set `APP_ENV=production`
 - [ ] Set `APP_DEBUG=false`
-- [ ] Generate new `APP_KEY`
-- [ ] Use production database
+- [ ] Generate `APP_KEY` baru
+- [ ] Gunakan database production
 - [ ] Set `MIDTRANS_IS_PRODUCTION=true`
-- [ ] Configure real email SMTP
+- [ ] Konfigurasi email SMTP real
 - [ ] Setup domain & HTTPS
-- [ ] Configure CORS properly
-- [ ] Setup Redis for cache/queue
-- [ ] Add cron for scheduler
-- [ ] Configure webhook URL in Midtrans
+- [ ] Konfigurasi CORS dengan benar
+- [ ] Setup Redis untuk cache/queue
+- [ ] Tambahkan cron untuk scheduler
+- [ ] Konfigurasi webhook URL di Midtrans
 
 ---
 
-## 🤝 Contributing
+## 🤝 Kontribusi
 
-Contributions are welcome! Please follow these steps:
+Kontribusi sangat diterima! Ikuti langkah-langkah berikut:
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+1. Fork repository ini
+2. Buat feature branch (`git checkout -b feature/fitur-baru`)
+3. Commit perubahan (`git commit -m 'Tambah fitur baru'`)
+4. Push ke branch (`git push origin feature/fitur-baru`)
+5. Buat Pull Request
 
-### Development Guidelines
+### Panduan Development
 
-- Follow PSR-12 coding standards
-- Write tests for new features
-- Update documentation
-- Keep commits atomic and descriptive
+- Ikuti standar coding PSR-12
+- Tulis tests untuk fitur baru
+- Update dokumentasi
+- Buat commits yang atomic dan descriptive
 
 ---
 
 ## 📝 License
 
-This project is open-sourced under the [MIT License](LICENSE).
+Project ini menggunakan [MIT License](LICENSE).
 
 ---
 
-## 📬 Contact & Links
+## 📬 Kontak & Links
 
-**Developer:** [Your Name]
+**Developer:** [Nama Anda]
 
-- 🌐 Portfolio: [your-website.com](https://your-website.com)
-- 💼 LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- 📧 Email: your.email@example.com
-- 💻 GitHub: [github.com/yourusername](https://github.com/yourusername)
+- 🌐 Portfolio: [website-anda.com](https://website-anda.com)
+- 💼 LinkedIn: [linkedin.com/in/profile-anda](https://linkedin.com/in/profile-anda)
+- 📧 Email: email.anda@example.com
+- 💻 GitHub: [github.com/username-anda](https://github.com/username-anda)
 
 ---
 
@@ -635,13 +665,15 @@ This project is open-sourced under the [MIT License](LICENSE).
 - [Midtrans Payment Gateway](https://midtrans.com)
 - [Swagger/OpenAPI](https://swagger.io)
 - [Docker](https://docker.com)
+- [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
+- [tymon/jwt-auth](https://github.com/tymondesigns/jwt-auth)
 
 ---
 
 <div align="center">
 
-**⭐ Star this repo if you find it helpful!**
+**⭐ Star repo ini jika bermanfaat!**
 
-Made with ❤️ for portfolio showcase
+Dibuat dengan ❤️ untuk portfolio showcase
 
 </div>

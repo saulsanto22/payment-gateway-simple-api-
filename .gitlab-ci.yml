@@ -1,34 +1,213 @@
+# =====================================================
+# GitLab CI/CD Pipeline - Laravel 12 Payment Gateway
+# =====================================================
+# Pipeline ini akan:
+# 1. TEST: Menjalankan 52 automated tests
+# 2. BUILD: Build Docker image untuk deployment
+# 3. DEPLOY: Deploy ke Railway (production)
+
 stages:
   - test
   - build
   - deploy
 
+# Variables global
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  
+  # Laravel Testing Environment
+  APP_ENV: testing
+  DB_CONNECTION: pgsql
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_DATABASE: testing
+  DB_USERNAME: postgres
+  DB_PASSWORD: secret
+
+# =====================================================
+# STAGE 1: TESTING
+# =====================================================
+
+# Job 1.1: Code Style Check dengan Laravel Pint
 pint:
   stage: test
-  image: laravelsail/php83-composer:latest
-  script:
-    - composer install --prefer-dist --no-progress
-    - ./vendor/bin/pint --test
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - when: always
-
-build:
-  stage: build
-  image: laravelsail/php83-composer:latest
-  script:
-    - composer install --no-dev --prefer-dist --no-progress --no-interaction
-  artifacts:
+  image: php:8.4-cli
+  
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-pint
     paths:
       - vendor/
-      - bootstrap/cache/
-    expire_in: 1 hour
+  
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git unzip
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install --prefer-dist --no-progress --no-interaction
+  
+  script:
+    - ./vendor/bin/pint --test
+  
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_MERGE_REQUEST_ID'
+    - when: always
+
+# Job 1.2: Run All Tests (52 tests dengan Pest)
+test:
+  stage: test
+  image: php:8.4-cli
   
-deploy:
-    stage: deploy
-    script:
-      - echo "Deploying Belum ada!"
-    rules:
-      - when: manual
+  # PostgreSQL & Redis sebagai service dependencies
+  services:
+    - postgres:16-alpine
+    - redis:7-alpine
+  
+  variables:
+    POSTGRES_DB: testing
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: secret
+    REDIS_HOST: redis
+  
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-test
+    paths:
+      - vendor/
+  
+  before_script:
+    # Install system dependencies
+    - apt-get update -qq && apt-get install -y -qq 
+        git 
+        libpq-dev 
+        libzip-dev 
+        unzip
+    
+    # Install PHP extensions (PostgreSQL, Redis, Zip)
+    - docker-php-ext-install pdo pdo_pgsql zip
+    - pecl install redis
+    - docker-php-ext-enable redis
+    
+    # Install Composer
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    
+    # Install dependencies
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress
+    
+    # Setup Laravel environment
+    - cp .env.example .env
+    - php artisan key:generate
+    - php artisan config:clear
+  
+  script:
+    # Run migrations
+    - php artisan migrate --force --no-interaction
+    
+    # Run all 52 tests
+    - php artisan test --parallel
+  
+  # Simpan test reports sebagai artifacts
+  artifacts:
+    when: always
+    reports:
+      junit: tests/results.xml
+    paths:
+      - tests/results.xml
+    expire_in: 1 week
+  
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_MERGE_REQUEST_ID'
+
+# =====================================================
+# STAGE 2: BUILD
+# =====================================================
+
+# Job 2.1: Build Docker Image
+build:
+  stage: build
+  image: docker:24-dind
+  
+  services:
+    - docker:24-dind
+  
+  before_script:
+    # Login ke GitLab Container Registry
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  
+  script:
+    # Build dari Dockerfile.dev
+    - docker build -f Dockerfile.dev -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker build -f Dockerfile.dev -t $CI_REGISTRY_IMAGE:latest .
+    
+    # Push ke Container Registry
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# =====================================================
+# STAGE 3: DEPLOY
+# =====================================================
+
+# Job 3.1: Deploy ke Railway (Manual Trigger)
+deploy_railway:
+  stage: deploy
+  image: node:20-alpine
+  
+  before_script:
+    # Install Railway CLI
+    - npm install -g @railway/cli
+  
+  script:
+    # Deploy menggunakan Railway
+    - railway up --service $RAILWAY_SERVICE_NAME
+    
+    # Run migrations di production
+    - railway run php artisan migrate --force
+    
+    # Cache configuration
+    - railway run php artisan config:cache
+    - railway run php artisan route:cache
+  
+  environment:
+    name: production
+    url: https://$RAILWAY_DOMAIN
+  
+  # Butuh GitLab CI/CD Variables:
+  # - RAILWAY_TOKEN: API token dari Railway
+  # - RAILWAY_SERVICE_NAME: Nama service
+  # - RAILWAY_DOMAIN: Domain aplikasi
+  
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual  # Click tombol "Deploy" di GitLab UI
+
+# =====================================================
+# ALTERNATIF DEPLOYMENT: VPS via SSH
+# =====================================================
+# Uncomment jika mau deploy ke VPS sendiri
+
+# deploy_vps:
+#   stage: deploy
+#   image: alpine:latest
+#   
+#   before_script:
+#     - apk add --no-cache openssh-client
+#     - eval $(ssh-agent -s)
+#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#     - mkdir -p ~/.ssh
+#     - chmod 700 ~/.ssh
+#     - ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
+#   
+#   script:
+#     - ssh $DEPLOY_USER@$DEPLOY_SERVER "
+#         cd $DEPLOY_PATH &&
+#         git pull origin main &&
+#         docker-compose -f docker-compose.prod.yml up -d --build &&
+#         docker-compose exec -T app php artisan migrate --force &&
+#         docker-compose exec -T app php artisan optimize
+#       "
+#   
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "main"'
+#       when: manual
