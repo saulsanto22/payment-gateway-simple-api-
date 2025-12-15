@@ -1,0 +1,53 @@
+# ============================================
+# Dockerfile untuk Development
+# ============================================
+# Lebih simpel dari production:
+# - Include dev dependencies
+# - No multi-stage build
+# - Debug tools enabled
+# ============================================
+
+FROM php:8.2-fpm-alpine
+
+# Install dependencies
+RUN apk add --no-cache \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo \
+        pdo_pgsql \
+        pgsql \
+        gd \
+        pcntl \
+        bcmath
+
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Install Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application
+COPY . /var/www/html
+
+# Install dependencies (including dev)
+RUN composer install --prefer-dist --optimize-autoloader
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html
+
+# Expose port 8000 (artisan serve)
+EXPOSE 8000
+
+# Start artisan serve
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
