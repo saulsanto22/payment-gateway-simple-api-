@@ -245,21 +245,23 @@ pages:
   image: php:8.3-cli
   
   before_script:
-    - apt-get update && apt-get install -y git zip unzip
+    # Install dependencies
+    - apt-get update && apt-get install -y git zip unzip libzip-dev
+    - docker-php-ext-install zip
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   
   script:
     - echo "📚 Generating API documentation..."
-    - composer install --no-dev
+    - composer install --no-dev --no-interaction
     - cp .env.example .env
     - php artisan key:generate
+    - mkdir -p storage/api-docs
+    - chmod -R 777 storage bootstrap/cache
     - php artisan l5-swagger:generate
-    
     - echo "📦 Preparing documentation for GitLab Pages..."
     - mkdir -p public
-    - cp -r storage/api-docs/* public/
-    
-    - echo "✅ Documentation ready at: https://saulsanto22.gitlab.io/my-first-pipeline"
+    - if [ -d "storage/api-docs" ]; then cp -r storage/api-docs/* public/; fi
+    - echo "✅ Documentation ready at https://saulsanto22.gitlab.io/my-first-pipeline"
   
   artifacts:
     paths:
