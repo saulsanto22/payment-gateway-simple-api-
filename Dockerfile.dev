@@ -7,7 +7,7 @@
 # - Debug tools enabled
 # ============================================
 
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install dependencies
 RUN apk add --no-cache \
@@ -19,6 +19,9 @@ RUN apk add --no-cache \
     unzip \
     git \
     curl \
+    autoconf \
+    g++ \
+    make \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo \

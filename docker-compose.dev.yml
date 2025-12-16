@@ -1,0 +1,109 @@
+# ============================================
+# Docker Compose - Development Mode
+# ============================================
+# Differences from production:
+# - Mount source code (hot reload)
+# - Enable debug mode
+# - Expose more ports
+# - No build optimization
+# ============================================
+
+version: '3.8'
+
+services:
+  # Laravel Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: payment-gateway-app-dev
+    restart: unless-stopped
+    working_dir: /var/www/html
+    
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-payment_gateway_dev}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=database
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=file
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+    
+    # Mount source code untuk hot reload
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor  # Exclude vendor (use container's)
+      - /var/www/html/node_modules
+    
+    ports:
+      - "8000:8000"
+    
+    networks:
+      - payment-gateway-network
+    
+    depends_on:
+      - db
+      - redis
+    
+    # Development server (artisan serve)
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  # PostgreSQL (same as production)
+  db:
+    image: postgres:16-alpine
+    container_name: payment-gateway-db-dev
+    restart: unless-stopped
+    
+    environment:
+      - POSTGRES_DB=${DB_DATABASE:-payment_gateway_dev}
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-secret}
+    
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    
+    ports:
+      - "5432:5432"
+    
+    networks:
+      - payment-gateway-network
+
+  # Redis (same as production)
+  redis:
+    image: redis:7-alpine
+    container_name: payment-gateway-redis-dev
+    restart: unless-stopped
+    
+    ports:
+      - "6379:6379"
+    
+    networks:
+      - payment-gateway-network
+
+  # MailHog (Email testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: payment-gateway-mailhog-dev
+    restart: unless-stopped
+    
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    
+    networks:
+      - payment-gateway-network
+
+volumes:
+  postgres-data-dev:
+    driver: local
+
+networks:
+  payment-gateway-network:
+    driver: bridge

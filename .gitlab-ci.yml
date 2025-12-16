@@ -4,7 +4,7 @@
 # Pipeline ini akan:
 # 1. TEST: Menjalankan 52 automated tests
 # 2. BUILD: Build Docker image untuk deployment
-# 3. DEPLOY: Deploy ke Railway (production)
+# 3. DEPLOY: Deploy ke Render.com (production, gratis!)
 
 stages:
   - test
@@ -149,38 +149,48 @@ build:
 # STAGE 3: DEPLOY
 # =====================================================
 
-# Job 3.1: Deploy ke Railway (Manual Trigger)
-deploy_railway:
+# Job 3.1: Deploy ke Render.com (Manual Trigger)
+deploy_render:
   stage: deploy
-  image: node:20-alpine
+  image: alpine:latest
   
   before_script:
-    # Install Railway CLI
-    - npm install -g @railway/cli
+    # Install curl untuk trigger Deploy Hook
+    - apk add --no-cache curl
   
   script:
-    # Deploy menggunakan Railway
-    - railway up --service $RAILWAY_SERVICE_NAME
-    
-    # Run migrations di production
-    - railway run php artisan migrate --force
-    
-    # Cache configuration
-    - railway run php artisan config:cache
-    - railway run php artisan route:cache
+    # Trigger Render deployment via Deploy Hook
+    - echo "Triggering Render deployment..."
+    - |
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
+      if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 201 ]; then
+        echo "✅ Deployment triggered successfully!"
+        echo "🚀 Check deployment status at: $RENDER_SERVICE_URL"
+        echo "📊 Monitor logs in Render Dashboard"
+      else
+        echo "❌ Failed to trigger deployment. HTTP Status: $RESPONSE"
+        exit 1
+      fi
   
   environment:
     name: production
-    url: https://$RAILWAY_DOMAIN
+    url: $RENDER_SERVICE_URL
   
   # Butuh GitLab CI/CD Variables:
-  # - RAILWAY_TOKEN: API token dari Railway
-  # - RAILWAY_SERVICE_NAME: Nama service
-  # - RAILWAY_DOMAIN: Domain aplikasi
+  # - RENDER_DEPLOY_HOOK: Deploy Hook URL dari Render (format: https://api.render.com/deploy/srv-xxx?key=yyy)
+  # - RENDER_SERVICE_URL: URL aplikasi (contoh: https://payment-gateway-api.onrender.com)
+  
+  # Notes:
+  # - Setelah deploy trigger, Render akan:
+  #   1. Pull latest code dari GitHub
+  #   2. Build aplikasi
+  #   3. Run migrations (jika ada dalam build command)
+  #   4. Deploy ke production
+  # - Untuk run migrations manual: Buka Render Shell → php artisan migrate --force
   
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: manual  # Click tombol "Deploy" di GitLab UI
+      when: manual  # Klik tombol "Deploy" di GitLab UI untuk trigger
 
 # =====================================================
 # ALTERNATIF DEPLOYMENT: VPS via SSH

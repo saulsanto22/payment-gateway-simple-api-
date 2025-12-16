@@ -548,6 +548,7 @@ php artisan schedule:list
 ├── docs/
 │   ├── DOCKER_SETUP_GUIDE.md          # Tutorial Docker lengkap
 │   ├── GITLAB_CICD_SETUP.md           # Panduan CI/CD (konsep)
+│   ├── RENDER_QUICK_START.md          # Deploy Render.com (15 menit) 🆕
 │   └── CICD_DEPLOYMENT_TUTORIAL.md    # Tutorial CI/CD step-by-step 🆕
 ├── docker-compose.dev.yml  # Development containers
 ├── Dockerfile.dev          # PHP 8.4 + extensions
@@ -569,7 +570,7 @@ php artisan schedule:list
 - ✅ Setup GitLab CI/CD Pipeline dari nol
 - ✅ Automated testing (52 tests) setiap push
 - ✅ Build Docker image otomatis
-- ✅ Deploy ke Railway dengan 1 klik
+- ✅ Deploy ke Render.com (gratis, tanpa CC!) dengan 1 klik
 - ✅ Environment variables management
 - ✅ Production monitoring
 
@@ -577,25 +578,49 @@ php artisan schedule:list
 
 ---
 
-### Opsi 1: Deploy dengan CI/CD (Railway)
+### Opsi 1: Render.com Quick Deploy (Termudah!) ⚡
 
-**Otomatis testing & deployment dengan GitLab CI/CD**
+**Deploy manual dalam 15 menit - 100% GRATIS tanpa kartu kredit!**
 
-1. Setup GitLab repository & Railway account
-2. Konfigurasi `.gitlab-ci.yml` (sudah ada!)
-3. Setup CI/CD variables di GitLab
-4. Push code → Pipeline otomatis running
-5. Klik tombol "Deploy" untuk production
+> 🎨 **[Render Quick Start Guide](docs/RENDER_QUICK_START.md)** - Step-by-step super simple!
 
-> 📖 **Tutorial Lengkap:** [docs/CICD_DEPLOYMENT_TUTORIAL.md](docs/CICD_DEPLOYMENT_TUTORIAL.md)
+**Langkah singkat:**
+1. Push code ke GitHub
+2. Connect GitHub repo ke Render
+3. Add PostgreSQL database (gratis)
+4. Set environment variables
+5. Deploy! 🎉
+
+**Cocok untuk:**
+- ✅ First-time deployment
+- ✅ Portfolio/learning projects
+- ✅ GitLab users (bisa auto-sync ke GitHub)
+- ✅ Benar-benar gratis 750 jam/bulan!
+
+---
+
+### Opsi 2: Deploy dengan CI/CD (Advanced)
+
+**Otomatis testing & deployment dengan GitLab CI/CD:**
+
+> 📖 **[Tutorial CI/CD Lengkap](docs/CICD_DEPLOYMENT_TUTORIAL.md)** - Professional workflow (30-45 menit)
+
+**Proses:**
+1. Setup GitLab repository & Render account
+2. Push code ke GitHub (auto-sync dari GitLab)
+3. Setup Render Deploy Hook
+4. Konfigurasi `.gitlab-ci.yml` (sudah ada!)
+5. Push code → Pipeline otomatis running (test + build)
+6. Klik tombol "Deploy" untuk production
 
 **Keuntungan:**
-- ✅ Automated testing sebelum deploy
+- ✅ Automated testing sebelum deploy (52 tests)
 - ✅ Zero-downtime deployment
 - ✅ Rollback mudah jika ada error
-- ✅ Professional workflow
+- ✅ Professional workflow untuk portfolio
+- ✅ Tetap 100% gratis!
 
-### Opsi 2: VPS (DigitalOcean, Linode, AWS)
+### Opsi 3: VPS (DigitalOcean, Linode, AWS)
 
 Gunakan Docker Compose untuk production:
 
