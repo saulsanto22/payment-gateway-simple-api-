@@ -9,7 +9,6 @@
 stages:
   - test
   - build
-  - deploy
   - docs
 
 # Variables global
@@ -160,84 +159,7 @@ build:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
 # =====================================================
-# STAGE 3: DEPLOY
-# =====================================================
-
-# Job 3.1: Deploy ke Render.com (Manual Trigger)
-deploy_render:
-  stage: deploy
-  image: alpine:latest
-  
-  before_script:
-    # Install curl untuk trigger Deploy Hook
-    - apk add --no-cache curl
-  
-  script:
-    # Trigger Render deployment via Deploy Hook
-    - echo "Triggering Render deployment..."
-    - |
-      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
-      if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 201 ]; then
-        echo "✅ Deployment triggered successfully!"
-        echo "🚀 Check deployment status at: $RENDER_SERVICE_URL"
-        echo "📊 Monitor logs in Render Dashboard"
-      else
-        echo "❌ Failed to trigger deployment. HTTP Status: $RESPONSE"
-        exit 1
-      fi
-  
-  environment:
-    name: production
-    url: $RENDER_SERVICE_URL
-  
-  # Butuh GitLab CI/CD Variables:
-  # - RENDER_DEPLOY_HOOK: Deploy Hook URL dari Render (format: https://api.render.com/deploy/srv-xxx?key=yyy)
-  # - RENDER_SERVICE_URL: URL aplikasi (contoh: https://payment-gateway-api.onrender.com)
-  
-  # Notes:
-  # - Setelah deploy trigger, Render akan:
-  #   1. Pull latest code dari GitHub
-  #   2. Build aplikasi
-  #   3. Run migrations (jika ada dalam build command)
-  #   4. Deploy ke production
-  # - Untuk run migrations manual: Buka Render Shell → php artisan migrate --force
-  
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: manual  # Klik tombol "Deploy" di GitLab UI untuk trigger
-
-# =====================================================
-# ALTERNATIF DEPLOYMENT: VPS via SSH
-# =====================================================
-# Uncomment jika mau deploy ke VPS sendiri
-
-# deploy_vps:
-#   stage: deploy
-#   image: alpine:latest
-#   
-#   before_script:
-#     - apk add --no-cache openssh-client
-#     - eval $(ssh-agent -s)
-#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-#     - mkdir -p ~/.ssh
-#     - chmod 700 ~/.ssh
-#     - ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
-#   
-#   script:
-#     - ssh $DEPLOY_USER@$DEPLOY_SERVER "
-#         cd $DEPLOY_PATH &&
-#         git pull origin main &&
-#         docker-compose -f docker-compose.prod.yml up -d --build &&
-#         docker-compose exec -T app php artisan migrate --force &&
-#         docker-compose exec -T app php artisan optimize
-#       "
-#   
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH == "main"'
-#       when: manual
-
-# =====================================================
-# STAGE 4: DOCS - Deploy API Documentation ke GitLab Pages
+# STAGE 3: DOCS - Deploy API Documentation ke GitLab Pages
 # =====================================================
 
 pages:
