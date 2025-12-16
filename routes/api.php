@@ -7,6 +7,16 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint (public, no auth)
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+        'service' => 'Payment Gateway API',
+        'version' => '1.0.0',
+    ]);
+});
+
 // Auth routes dengan rate limiting berbeda per endpoint
 Route::prefix('auth')->group(function () {
     // Public routes (tidak perlu auth)
