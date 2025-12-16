@@ -24,6 +24,11 @@ variables:
   DB_DATABASE: testing
   DB_USERNAME: postgres
   DB_PASSWORD: secret
+  
+  # JWT Configuration (untuk auth tests)
+  JWT_SECRET: "6zGKX9TxWk7t6VRBlHoQ8m7X8Q556epjmH23xn6oghPSOHmobIi3UWFYcE2AqDG4"
+  JWT_TTL: 60
+  JWT_REFRESH_TTL: 20160
 
 # =====================================================
 # STAGE 1: TESTING
