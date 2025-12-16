@@ -31,11 +31,12 @@ variables:
   JWT_REFRESH_TTL: 20160
   
   # Midtrans Configuration (untuk order tests)
-  MIDTRANS_CLIENT_KEY: "Mid-client-7JZT-VzqQvWoWOhv"
-  MIDTRANS_SERVER_KEY: "Mid-server-SKovHT-UPYZOI9LOqG_RQ2h_"
-  MIDTRANS_IS_PRODUCTION: false
-  MIDTRANS_IS_SANITIZED: true
-  MIDTRANS_IS_3DS: true
+  # IMPORTANT: Set these in GitLab CI/CD Variables (Settings -> CI/CD -> Variables)
+  # MIDTRANS_CLIENT_KEY: Set via GitLab Variables (masked)
+  # MIDTRANS_SERVER_KEY: Set via GitLab Variables (masked)
+  # MIDTRANS_IS_PRODUCTION: false
+  # MIDTRANS_IS_SANITIZED: true
+  # MIDTRANS_IS_3DS: true
 
 # =====================================================
 # STAGE 1: TESTING
