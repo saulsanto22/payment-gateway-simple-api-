@@ -8,10 +8,11 @@
 [![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-52_Passing-00C853?style=for-the-badge&logo=checkmarx&logoColor=white)](#testing)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitLab-FCA121?style=for-the-badge&logo=gitlab&logoColor=white)](docs/CICD_DEPLOYMENT_TUTORIAL.md)
+[![Tests](https://img.shields.io/badge/Tests-62_Passing-00C853?style=for-the-badge&logo=checkmarx&logoColor=white)](#testing)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitLab-FCA121?style=for-the-badge&logo=gitlab&logoColor=white)](https://gitlab.com/saulsanto22/my-first-pipeline/-/pipelines)
+[![Pipeline](https://gitlab.com/saulsanto22/my-first-pipeline/badges/main/pipeline.svg)](https://gitlab.com/saulsanto22/my-first-pipeline/-/pipelines)
 
-[🚀 Live Demo](#) • [📖 Dokumentasi API](http://localhost:8000/api/documentation) • [📊 Arsitektur](#arsitektur) • [🧪 Testing](#testing) • [⚙️ CI/CD](docs/CICD_DEPLOYMENT_TUTORIAL.md)
+[📖 API Documentation](https://saulsanto22.gitlab.io/my-first-pipeline) • [🚀 GitLab CI/CD](https://gitlab.com/saulsanto22/my-first-pipeline) • [📊 Arsitektur](#arsitektur) • [🧪 Testing](#testing) • [⚙️ Deployment](docs/CICD_DEPLOYMENT_TUTORIAL.md)
 
 </div>
 
