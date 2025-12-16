@@ -164,7 +164,7 @@ build:
 
 pages:
   stage: docs
-  image: php:8.3-cli
+  image: php:8.4-cli
   
   before_script:
     # Install dependencies
