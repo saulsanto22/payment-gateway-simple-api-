@@ -29,6 +29,13 @@ variables:
   JWT_SECRET: "6zGKX9TxWk7t6VRBlHoQ8m7X8Q556epjmH23xn6oghPSOHmobIi3UWFYcE2AqDG4"
   JWT_TTL: 60
   JWT_REFRESH_TTL: 20160
+  
+  # Midtrans Configuration (untuk order tests)
+  MIDTRANS_CLIENT_KEY: "Mid-client-7JZT-VzqQvWoWOhv"
+  MIDTRANS_SERVER_KEY: "Mid-server-SKovHT-UPYZOI9LOqG_RQ2h_"
+  MIDTRANS_IS_PRODUCTION: false
+  MIDTRANS_IS_SANITIZED: true
+  MIDTRANS_IS_3DS: true
 
 # =====================================================
 # STAGE 1: TESTING
