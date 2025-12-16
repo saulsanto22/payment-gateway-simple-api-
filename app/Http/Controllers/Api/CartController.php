@@ -119,9 +119,17 @@ class CartController extends Controller
      */
     public function add(AddCartRequest $request)
     {
-        return ApiResponse::success(
-            $this->cartService->addItem(auth()->user(), $request->product_id, $request->quantity),
-            'Item added to cart');
+        try {
+            $cart = $this->cartService->addItem(auth()->user(), $request->product_id, $request->quantity);
+
+            return ApiResponse::success($cart, 'Item added to cart');
+        } catch (\App\Exceptions\ProductNotFoundException $e) {
+            return ApiResponse::error($e->getMessage(), 404);
+        } catch (\App\Exceptions\InvalidQuantityException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
+        } catch (\App\Exceptions\OutOfStockException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
+        }
     }
 
     /**
@@ -176,9 +184,17 @@ class CartController extends Controller
      */
     public function update(UpdateCartRequest $request, $productId)
     {
-        return ApiResponse::success(
-            $this->cartService->updateItem(auth()->user(), $productId, $request->quantity),
-            'Item updated');
+        try {
+            $cart = $this->cartService->updateItem(auth()->user(), $productId, $request->quantity);
+
+            return ApiResponse::success($cart, 'Item updated');
+        } catch (\App\Exceptions\ProductNotFoundException $e) {
+            return ApiResponse::error($e->getMessage(), 404);
+        } catch (\App\Exceptions\InvalidQuantityException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
+        } catch (\App\Exceptions\OutOfStockException $e) {
+            return ApiResponse::error($e->getMessage(), 422);
+        }
     }
 
     /**

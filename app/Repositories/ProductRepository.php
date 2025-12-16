@@ -82,4 +82,12 @@ class ProductRepository
     {
         return Product::where('id', $productId)->lockForUpdate()->firstOrFail();
     }
+
+    /**
+     * Mencari produk berdasarkan ID tanpa lock (untuk read-only operations).
+     */
+    public function find($productId): ?Product
+    {
+        return Product::find($productId);
+    }
 }
