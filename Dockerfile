@@ -83,6 +83,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Create nginx pid directory
 RUN mkdir -p /run/nginx
 
+# Create supervisor log directory
+RUN mkdir -p /var/log/supervisor
+
 # Expose port 80
 EXPOSE 80
 
